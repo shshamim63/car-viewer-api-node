@@ -1,14 +1,15 @@
-import express, {Request, Response} from 'express';
+import express from 'express'
 
-import { appConfig } from './config';
+import { appConfig } from './config'
 
-const app = express();
-const port = 3000;
+import * as defaultRoutes from "./routes/default"
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World!');
-});
+const app = express()
+
+app.use(defaultRoutes.router)
+
+const port = appConfig.port || 3001
 
 app.listen(port, () => {
-  return console.log(`Express is listening at http://localhost:${appConfig.port}`);
-});
+  console.log(`Express is listening at http://localhost:${port}`)
+})
