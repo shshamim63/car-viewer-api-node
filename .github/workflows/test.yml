@@ -1,4 +1,4 @@
-name: Staging Deployment
+name: Run Tests
 on:
   pull_request:
     branches: [ master, staging ]
