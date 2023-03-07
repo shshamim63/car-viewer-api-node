@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: Sample API
+  description: Optional multiline or single-line description in HTML.
+  version: 0.1.9
+servers:
+  - url: http://localhost:3000
+    description: Internal staging server for testing
+paths:
+    /:
+        get:
+            tags:
+                - 'Default'
+            summary: The root path of the service
+            description: This route provides the indication that the server is running appropriately
+            responses:
+                '200':
+                    description: A JSON object
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ActiveMessage'
+components:
+    schemas:
+        ActiveMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: Message from the server.
+                    example: App server is running successfully
