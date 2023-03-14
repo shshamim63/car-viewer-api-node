@@ -8,6 +8,9 @@ import YAML from 'yamljs'
 
 
 import * as defaultRoutes from './routes/default'
+import * as carRouters from './routes/cars'
+import { errorHandler } from './util/errorHandler'
+import { invalidRouteHandler } from './util/invalidRouteHandler'
 
 const app = express()
 
@@ -43,5 +46,9 @@ const options = {
 
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options))
 app.use(defaultRoutes.router)
+app.use(carRouters.router)
+app.use(invalidRouteHandler)
+
+app.use(errorHandler)
 
 export { app }

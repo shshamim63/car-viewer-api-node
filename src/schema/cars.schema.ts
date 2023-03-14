@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-const carsSchema = z.object({
+export const CarSchema = z.object({
   name: z.string().min(5).max(30),
-  manufactureYear: z.string().regex(new RegExp('/^d{4}$/'))
-  availableColors: z.array() 
+  manufactureYear: z.string().regex(new RegExp('^20(1[1-9]|[2-9][0-9])$'), {message: 'year must contain 4 digit. Eg: 2000'}),
 })

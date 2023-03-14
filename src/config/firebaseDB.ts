@@ -7,6 +7,8 @@ initializeApp({
   credential: cert(serviceAccount as ServiceAccount)
 })
 
-const db = firestore()
+export const dbFirestore = firestore
 
-module.exports = db
+export const db = dbFirestore()
+
+export const CarRef = db.collection('Cars')
