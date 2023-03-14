@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-import * as defaultController from '../controller/defaultController'
+import * as defaultController from '../controller/default.controller'
 
 const router = Router()
 
