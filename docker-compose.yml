@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    restart: 'on-failure'
     ports:
       - '3000:3000'
     volumes:
@@ -14,12 +15,14 @@ services:
       - node-server
     links:
       - "mongo"
+    env_file:
+      - .env
   mongo:
     image: mongo
     ports:
-      - '27017:27017'
+      - 27017:27017
     volumes:
-      - ./data:/data/db
+      - data:/data/db
     networks:
       - node-server
 networks:

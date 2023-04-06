@@ -2,7 +2,7 @@ FROM node:latest
 
 WORKDIR /app
 
-ADD pacakage.json ./
+ADD package.json ./
 
 RUN npm install
 

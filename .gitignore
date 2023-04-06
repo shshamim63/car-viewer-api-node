@@ -3,3 +3,4 @@ dist/
 /data
 .env
 gcp_key.json
+package-lock.json

@@ -3,6 +3,6 @@ import { app } from './app'
 
 const port = appConfig.port || 3001
 
-app.listen(port, () => {
+app.listen(port, async () => {
     console.log(`Express is listening at http://localhost:${port}`)
 })

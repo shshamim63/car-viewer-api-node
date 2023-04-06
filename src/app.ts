@@ -5,14 +5,16 @@ import expressWinston from 'express-winston'
 import swaggerUi from 'swagger-ui-express'
 import YAML from 'yamljs'
 
-
-
 import * as defaultRoutes from './routes/default'
 import * as carRouters from './routes/cars'
+import * as authRoutes from './routes/auth'
 import { errorHandler } from './util/errorHandler'
 import { invalidRouteHandler } from './util/invalidRouteHandler'
+import { mongoConnect } from './config/mongoDB'
 
 const app = express()
+
+mongoConnect()
 
 app.use(
     bodyParser.urlencoded({
@@ -46,6 +48,7 @@ const options = {
 
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options))
 app.use(defaultRoutes.router)
+app.use(authRoutes.router)
 app.use(carRouters.router)
 app.use(invalidRouteHandler)
 

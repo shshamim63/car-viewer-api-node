@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { CarSchema } from '../schema/cars.schema'
+import { CarSchema } from '../schema/car/cars.schema'
 import { schemaValidation } from '../util/schemaValidation'
 
 import * as carService from '../service/car.service'
