@@ -1,0 +1,7 @@
+node_modules
+dist
+data
+package-*.json
+.prettierrc.json
+Dockerfile*
+docker-compose.yml
