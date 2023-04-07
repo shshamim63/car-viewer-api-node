@@ -30,7 +30,7 @@ app.use(
             winston.format.colorize(),
             winston.format.json()
         ),
-        meta: true, 
+        meta: true,
         msg: 'HTTP {{req.method}} {{req.url}}',
         expressFormat: true,
         colorize: false,

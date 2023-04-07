@@ -1,3 +1,3 @@
-import { IUserResponse } from "./user.model";
+import { IUserResponse } from './user.model'
 
 export type IResponse = string | IUserResponse

@@ -1,1 +1,1 @@
-export const SALTROUNDS = 10 
+export const SALTROUNDS = 10
