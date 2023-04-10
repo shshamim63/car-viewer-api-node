@@ -18,9 +18,8 @@ export const login = async (
     try {
         const requestBody: ILoginBody = req.body
         const body = schemaValidation(LoginBodySchema, requestBody)
-        console.log('Body', body)
         const response = await authService.login(body)
-        if (response) res.send(formatResponse(response)).status(200)
+        if (response) res.status(200).send(formatResponse(response))
     } catch (error) {
         next(error)
     }
@@ -34,8 +33,10 @@ export const registerUser = async (
     try {
         const requestBody: IRegistrationBody = req.body
         const body = schemaValidation(RegistrationBodySchema, requestBody)
-        const response = await authService.registerUser(body)
-        if (response) res.send(formatResponse(response)).status(200)
+        if (body) {
+            const response = await authService.registerUser(body)
+            if (response) res.status(200).send(formatResponse(response))
+        }
     } catch (error) {
         next(error)
     }

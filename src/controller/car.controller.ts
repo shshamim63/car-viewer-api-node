@@ -14,7 +14,7 @@ export const createCarRecord = async (
     try {
         const body = schemaValidation(CarSchema, req.body) as unknown as Car
         const response = await carService.createCarRecord(body)
-        if (response) res.send(formatResponse(response)).status(200)
+        if (response) res.status(200).send(formatResponse(response))
     } catch (error) {
         next(error)
     }
