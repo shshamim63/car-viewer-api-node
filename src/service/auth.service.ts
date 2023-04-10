@@ -46,7 +46,9 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
         throw new AppError(404, 'Invalid user credential', `Invalid password`)
 }
 
-export const registerUser = async (body: IRegistrationBody): Promise<IAuthenticatedUser> => {
+export const registerUser = async (
+    body: IRegistrationBody
+): Promise<IAuthenticatedUser> => {
     const data: IUser = {
         email: body.email,
         passwordHash: await bcrypt.hashSync(body.password, SALTROUNDS),
@@ -73,10 +75,18 @@ export const registerUser = async (body: IRegistrationBody): Promise<IAuthentica
 
 const generateAuthenticatedUserInfo = async (user: IUser) => {
     const userinfo = convertToUserResponse(user)
-    const accessToken = generateToken(userinfo, authConfig.accessTokenSecret, '15m')
-    const refreshToken = generateToken(userinfo, authConfig.refreshTokenSecret, '1d')
-    if(refreshToken) {
-       await saveRefreshToken(refreshToken, userinfo._id)
+    const accessToken = generateToken(
+        userinfo,
+        authConfig.accessTokenSecret,
+        '15m'
+    )
+    const refreshToken = generateToken(
+        userinfo,
+        authConfig.refreshTokenSecret,
+        '1d'
+    )
+    if (refreshToken) {
+        await saveRefreshToken(refreshToken, userinfo._id)
     }
     return {
         ...userinfo,
@@ -85,12 +95,14 @@ const generateAuthenticatedUserInfo = async (user: IUser) => {
     }
 }
 
-const generateToken = (user: IUser, token: string, expiresIn: string): string => {
-    return jwt.sign(
-        { ...user, _id: user._id.toString() },
-        token,
-        { expiresIn: expiresIn }
-    )
+const generateToken = (
+    user: IUser,
+    token: string,
+    expiresIn: string
+): string => {
+    return jwt.sign({ ...user, _id: user._id.toString() }, token, {
+        expiresIn: expiresIn,
+    })
 }
 
 const saveUser = async (data: IUser): Promise<IUser> => {
@@ -99,7 +111,7 @@ const saveUser = async (data: IUser): Promise<IUser> => {
     return user
 }
 
-const saveRefreshToken = async ( refreshToken: string, userId: string) => {
+const saveRefreshToken = async (refreshToken: string, userId: string) => {
     const token = new RefreshToken({ userId: userId, token: refreshToken })
     await token.save()
 }

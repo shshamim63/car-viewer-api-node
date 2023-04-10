@@ -39,11 +39,11 @@ export const UserSchema = UserResponseSchema.merge(
 export const AuthenticatedUserSchema = UserResponseSchema.merge(
     z.object({
         accessToken: z.string(),
-        refreshToken: z.string()
+        refreshToken: z.string(),
     })
 )
 
 export const RefreshTokenSchema = z.object({
     userId: z.string(),
-    token: z.string()
+    token: z.string(),
 })

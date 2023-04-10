@@ -14,6 +14,6 @@ export const errorHandler = (
     if (err.message) errorResponse['message'] = err.message
     if (err.description) errorResponse['description'] = err.description
     if (err.statusCode) statusCode = err.statusCode
-    
+
     res.status(statusCode).send(errorResponse)
 }
