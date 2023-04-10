@@ -7,7 +7,7 @@ import {
     IRegistrationBody,
     IUser,
 } from '../model/user.model'
-import { User } from '../schema/user/user.mongo.schema'
+import { RefreshToken, User } from '../schema/user/user.mongo.schema'
 import { AppError } from '../util/appError'
 import { SALTROUNDS } from '../util/constant'
 import { authConfig } from '../config'
@@ -30,14 +30,7 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
                 user.passwordHash
             )
         if (user && authenticate) {
-            const accessToken = generateToken(user, authConfig.accessTokenSecret, '15m')
-            const refreshToken = generateToken(user, authConfig.refreshTokenSecret, '1d')
-            return convertToUserResponse({
-                ...user,
-                accessToken,
-                refreshToken,
-                _id: user._id.toString(),
-            })
+            return await generateAuthenticatedUserInfo(user)
         }
     } catch (error) {
         throw new AppError(500, 'Server error')
@@ -53,7 +46,7 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
         throw new AppError(404, 'Invalid user credential', `Invalid password`)
 }
 
-export const registerUser = async (body: IRegistrationBody): Promise<IUser> => {
+export const registerUser = async (body: IRegistrationBody): Promise<IAuthenticatedUser> => {
     const data: IUser = {
         email: body.email,
         passwordHash: await bcrypt.hashSync(body.password, SALTROUNDS),
@@ -61,9 +54,8 @@ export const registerUser = async (body: IRegistrationBody): Promise<IUser> => {
         avatar: body.avatar ?? '',
     }
     try {
-        const user = new User(data)
-        await user.save()
-        return user
+        const user = await saveUser(data)
+        return await generateAuthenticatedUserInfo(user)
     } catch (error) {
         if (error.code === 11000) {
             throw new AppError(
@@ -79,10 +71,35 @@ export const registerUser = async (body: IRegistrationBody): Promise<IUser> => {
 
 /*---------**Private Methods**--------*/
 
+const generateAuthenticatedUserInfo = async (user: IUser) => {
+    const userinfo = convertToUserResponse(user)
+    const accessToken = generateToken(userinfo, authConfig.accessTokenSecret, '15m')
+    const refreshToken = generateToken(userinfo, authConfig.refreshTokenSecret, '1d')
+    if(refreshToken) {
+       await saveRefreshToken(refreshToken, userinfo._id)
+    }
+    return {
+        ...userinfo,
+        accessToken,
+        refreshToken,
+    }
+}
+
 const generateToken = (user: IUser, token: string, expiresIn: string): string => {
     return jwt.sign(
         { ...user, _id: user._id.toString() },
         token,
         { expiresIn: expiresIn }
     )
+}
+
+const saveUser = async (data: IUser): Promise<IUser> => {
+    const user = new User(data)
+    await user.save()
+    return user
+}
+
+const saveRefreshToken = async ( refreshToken: string, userId: string) => {
+    const token = new RefreshToken({ userId: userId, token: refreshToken })
+    await token.save()
 }
