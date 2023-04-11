@@ -4,7 +4,7 @@ import { app } from '../../../src/app'
 import { IRegistrationBody } from '../../../src/model/user/user.model'
 import { User } from '../../../src/model/user/user.mongo.schema'
 
-describe('Auth', () => {
+describe('Auth/Registration', () => {
     let user
     const requestBody = {} as IRegistrationBody
     describe('Registration Flow', () => {
