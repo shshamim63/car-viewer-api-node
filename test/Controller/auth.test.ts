@@ -2,8 +2,6 @@ import request from 'supertest'
 import { app } from '../../src/app'
 
 import { IRegistrationBody } from '../../src/model/user/user.model'
-import { AppError } from '../../src/middlewares/appError'
-import { object } from 'zod'
 
 describe('Auth', () => {
     describe('Registration Flow', () => {
@@ -64,6 +62,7 @@ describe('Auth', () => {
                 const response = await request(app)
                     .post('/user/registration')
                     .send(requestBody)
+                expect(response.error.status).toEqual(400)
                 expect(response._body.message).toEqual('Invalid Schema')
                 expect(
                     response._body.description.find((message) =>
@@ -83,6 +82,57 @@ describe('Auth', () => {
                         message.path.includes('username')
                     )
                 ).toEqual(undefined)
+            })
+        })
+        describe('Validate password and confirmPassword', () => {
+            test('It should throw error when password length is less than 8', async () => {
+                requestBody['password'] = '1234'
+                const response = await request(app)
+                    .post('/user/registration')
+                    .send(requestBody)
+                expect(response.error.status).toEqual(400)
+                expect(response._body.message).toEqual('Invalid Schema')
+                expect(
+                    response._body.description.find((message) =>
+                        message.path.includes('password')
+                    ).message
+                ).toEqual('String must contain at least 8 character(s)')                
+            })
+
+            test('It should throw error when confirmPassword length is less than 8', async () => {
+                requestBody['confirmPassword'] = '1234'
+                const response = await request(app)
+                    .post('/user/registration')
+                    .send(requestBody)
+                expect(response._body.message).toEqual('Invalid Schema')
+                expect(response.error.status).toEqual(400)
+                expect(
+                    response._body.description.find((message) =>
+                        message.path.includes('confirmPassword')
+                    ).message
+                ).toEqual('String must contain at least 8 character(s)')
+            })
+
+            test('It should throw error when password and confirm password are not equal', async () => {
+                requestBody['password'] = '123456789'
+                requestBody['confirmPassword'] = '987654321'
+                const response = await request(app).post('/user/registration').send(requestBody)
+                expect(response._body.message).toEqual('Invalid Schema')
+                expect(response.error.status).toEqual(400)
+                expect(
+                    response._body.description.find((message) =>
+                        message.message === 'Password and confirm password must match'
+                    ).message
+                ).toEqual('Password and confirm password must match')
+                console.log(response._body.description)
+            })
+        })
+        describe('It should register a new user', () => {
+            test('When all the field contains valid data should create a new user', async () => {
+                requestBody['password'] = '123456789'
+                requestBody['confirmPassword'] = '123456789'
+                const response = await request(app).post('/user/registration').send(requestBody)
+                expect(response.status).toEqual(201)
             })
         })
     })
