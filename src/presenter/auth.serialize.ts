@@ -1,7 +1,15 @@
 import { IAuthenticatedUser, IUser } from '../model/user/user.model'
-import { AuthenticatedUserSchema } from '../model/user/user.schema'
 
 export const convertToUserResponse = (data: IUser): IAuthenticatedUser => {
-    const userinfo = { ...data, _id: data._id.toString() }
-    return AuthenticatedUserSchema.parse(userinfo)
+    const userInfo = {
+        avatar: data.avatar,
+        createdAt: data.createdAt,
+        email: data.email,
+        id: data.id,
+        profileId: data.profileId,
+        role: data.role,
+        updatedAt: data.updatedAt,
+        username: data.username,
+    } as IAuthenticatedUser
+    return userInfo
 }

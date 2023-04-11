@@ -56,9 +56,10 @@ export const registerUser = async (
         avatar: body.avatar ?? '',
     }
     try {
-        const user = await saveUser(data)
+        const user = await createUser(data)
         return await generateAuthenticatedUserInfo(user)
     } catch (error) {
+        console.log("Error", error)
         if (error.code === 11000) {
             throw new AppError(
                 400,
@@ -74,22 +75,23 @@ export const registerUser = async (
 /*---------**Private Methods**--------*/
 
 const generateAuthenticatedUserInfo = async (user: IUser) => {
-    const userinfo = convertToUserResponse(user)
+    const userInfo = convertToUserResponse(user)
     const accessToken = generateToken(
-        userinfo,
+        userInfo,
         authConfig.accessTokenSecret,
         '15m'
     )
     const refreshToken = generateToken(
-        userinfo,
+        userInfo,
         authConfig.refreshTokenSecret,
         '1d'
     )
+
     if (refreshToken) {
-        await saveRefreshToken(refreshToken, userinfo._id)
+        await saveRefreshToken(refreshToken, userInfo.id)
     }
     return {
-        ...userinfo,
+        ...userInfo,
         accessToken,
         refreshToken,
     }
@@ -100,15 +102,14 @@ const generateToken = (
     token: string,
     expiresIn: string
 ): string => {
-    return jwt.sign({ ...user, _id: user._id.toString() }, token, {
+    return jwt.sign({ ...user, id: user.id }, token, {
         expiresIn: expiresIn,
     })
 }
 
-const saveUser = async (data: IUser): Promise<IUser> => {
-    const user = new User(data)
-    await user.save()
-    return user
+const createUser = async (data: IUser): Promise<IUser> => {
+    const savedUser = await User.create(data)
+    return savedUser
 }
 
 const saveRefreshToken = async (refreshToken: string, userId: string) => {

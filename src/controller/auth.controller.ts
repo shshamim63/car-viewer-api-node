@@ -35,7 +35,7 @@ export const registerUser = async (
         const body = schemaValidation(RegistrationBodySchema, requestBody)
         if (body) {
             const response = await authService.registerUser(body)
-            if (response) res.status(200).send(formatResponse(response))
+            if (response) res.status(201).send(formatResponse(response))
         }
     } catch (error) {
         next(error)

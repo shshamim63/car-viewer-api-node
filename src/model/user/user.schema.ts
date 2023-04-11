@@ -23,7 +23,7 @@ export const UserResponseSchema = z.object({
     avatar: z.string().optional(),
     createdAt: z.date(),
     email: email,
-    _id: z.string(),
+    id: z.string(),
     profileId: z.string().nullable().optional(),
     role: z.enum(ROLE),
     updatedAt: z.date(),
