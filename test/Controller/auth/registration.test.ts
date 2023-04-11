@@ -1,11 +1,13 @@
 import request from 'supertest'
-import { app } from '../../src/app'
+import { app } from '../../../src/app'
 
-import { IRegistrationBody } from '../../src/model/user/user.model'
+import { IRegistrationBody } from '../../../src/model/user/user.model'
+import { User } from '../../../src/model/user/user.mongo.schema'
 
 describe('Auth', () => {
+    let user
+    const requestBody = {} as IRegistrationBody
     describe('Registration Flow', () => {
-        const requestBody = {} as IRegistrationBody
         test('It should throw error, when empty request body is provided', async () => {
             const response = await request(app)
                 .post('/user/registration')
@@ -124,15 +126,23 @@ describe('Auth', () => {
                         message.message === 'Password and confirm password must match'
                     ).message
                 ).toEqual('Password and confirm password must match')
-                console.log(response._body.description)
             })
         })
         describe('It should register a new user', () => {
+            afterAll(async ()=> {
+                await User.deleteOne({_id: user.id})
+            })
             test('When all the field contains valid data should create a new user', async () => {
                 requestBody['password'] = '123456789'
                 requestBody['confirmPassword'] = '123456789'
                 const response = await request(app).post('/user/registration').send(requestBody)
+                user = JSON.parse(response.res.text).message
                 expect(response.status).toEqual(201)
+            })
+            
+            test('It should throw error while creating duplicate user', async () => {
+                const response = await request(app).post('/user/registration').send(requestBody)
+                expect(response.error.status).toEqual(409)
             })
         })
     })

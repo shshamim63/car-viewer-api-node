@@ -59,10 +59,9 @@ export const registerUser = async (
         const user = await createUser(data)
         return await generateAuthenticatedUserInfo(user)
     } catch (error) {
-        console.log("Error", error)
         if (error.code === 11000) {
             throw new AppError(
-                400,
+                409,
                 'User already exists with the following',
                 error.keyValue
             )
