@@ -6,10 +6,10 @@ import {
     ILoginBody,
     IRegistrationBody,
     IUser,
-} from '../model/user.model'
-import { RefreshToken, User } from '../schema/user/user.mongo.schema'
-import { AppError } from '../util/appError'
-import { SALTROUNDS } from '../util/constant'
+} from '../model/user/user.model'
+import { RefreshToken, User } from '../model/user/user.mongo.schema'
+import { AppError } from '../middlewares/appError'
+import { SALTROUNDS } from '../const'
 import { authConfig } from '../config'
 
 import { convertToUserResponse } from '../presenter/auth.serialize'

@@ -7,8 +7,8 @@ import { formatResponse } from '../util/formatResponse'
 import {
     LoginBodySchema,
     RegistrationBodySchema,
-} from '../schema/user/user.schema'
-import { ILoginBody, IRegistrationBody } from '../model/user.model'
+} from '../model/user/user.schema'
+import { ILoginBody, IRegistrationBody } from '../model/user/user.model'
 
 export const login = async (
     req: Request,

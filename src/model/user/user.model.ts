@@ -6,7 +6,7 @@ import {
     RegistrationBodySchema,
     UserResponseSchema,
     UserSchema,
-} from '../schema/user/user.schema'
+} from './user.schema'
 
 export type IUser = z.infer<typeof UserSchema>
 export type IRegistrationBody = z.infer<typeof RegistrationBodySchema>

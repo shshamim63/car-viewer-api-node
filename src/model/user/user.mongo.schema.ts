@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose'
-import { IRefreshToken, IUser } from '../../model/user.model'
-import { ROLE } from '../../util/constant'
+import { IRefreshToken, IUser } from './user.model'
+import { ROLE } from '../../const'
 
 const userSchema = new Schema<IUser>(
     {

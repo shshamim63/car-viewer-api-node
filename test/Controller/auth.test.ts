@@ -1,8 +1,8 @@
 import request from 'supertest'
 import { app } from '../../src/app'
 
-import { IRegistrationBody } from '../../src/model/user.model'
-import { AppError } from '../../src/util/appError'
+import { IRegistrationBody } from '../../src/model/user/user.model'
+import { AppError } from '../../src/middlewares/appError'
 import { object } from 'zod'
 
 describe('Auth', () => {

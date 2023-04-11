@@ -1,4 +1,4 @@
-import { IResponse } from '../model/response.model'
+import { IResponse } from '../model/response/response.model'
 
 export const formatResponse = (message: IResponse) => {
     return {

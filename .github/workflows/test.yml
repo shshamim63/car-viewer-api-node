@@ -1,7 +1,11 @@
 name: Run Tests
 on:
     pull_request:
+        types:
+          - opened
+          - edited
         branches: [master, staging]
+    workflow_dispatch:
 jobs:
     test:
         runs-on: ubuntu-latest

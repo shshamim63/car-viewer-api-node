@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express'
-import { CarSchema } from '../schema/car/cars.schema'
+import { CarSchema } from '../model/car/cars.schema'
 import { schemaValidation } from '../util/schemaValidation'
 
 import * as carService from '../service/car.service'
-import { Car } from '../model/cars.model'
+import { Car } from '../model/car/cars.model'
 import { formatResponse } from '../util/formatResponse'
 
 export const createCarRecord = async (

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ROLE } from '../../util/constant'
+import { ROLE } from '../../const'
 
 const email = z.string().email()
 const username = z.string().min(6)

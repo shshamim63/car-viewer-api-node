@@ -8,8 +8,8 @@ import YAML from 'yamljs'
 import * as defaultRoutes from './routes/default'
 import * as carRouters from './routes/cars'
 import * as authRoutes from './routes/auth'
-import { errorHandler } from './util/errorHandler'
-import { invalidRouteHandler } from './util/invalidRouteHandler'
+import { errorHandler } from './middlewares/errorHandler'
+import { invalidRouteHandler } from './middlewares/invalidRouteHandler'
 import { mongoConnect } from './config/mongoDB'
 
 const app = express()
