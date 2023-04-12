@@ -8,6 +8,7 @@ export const convertToUserResponse = (data: IUser): IAuthenticatedUser => {
         id: data.id,
         profileId: data.profileId,
         role: data.role,
+        type: 'Bearer',
         updatedAt: data.updatedAt,
         username: data.username,
     } as IAuthenticatedUser

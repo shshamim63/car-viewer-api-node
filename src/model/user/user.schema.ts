@@ -40,6 +40,7 @@ export const AuthenticatedUserSchema = UserResponseSchema.merge(
     z.object({
         accessToken: z.string(),
         refreshToken: z.string(),
+        type: z.string(),
     })
 )
 
