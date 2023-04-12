@@ -1,10 +1,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
-import winston from 'winston'
-import expressWinston from 'express-winston'
 import swaggerUi from 'swagger-ui-express'
 import YAML from 'yamljs'
-
 import * as defaultRoutes from './routes/default'
 import * as carRouters from './routes/cars'
 import * as authRoutes from './routes/auth'
@@ -22,23 +19,6 @@ app.use(
     })
 )
 app.use(bodyParser.json())
-
-app.use(
-    expressWinston.logger({
-        transports: [new winston.transports.Console()],
-        format: winston.format.combine(
-            winston.format.colorize(),
-            winston.format.json()
-        ),
-        meta: true,
-        msg: 'HTTP {{req.method}} {{req.url}}',
-        expressFormat: true,
-        colorize: false,
-        ignoreRoute: function (_req, _res) {
-            return false
-        },
-    })
-)
 
 const swaggerDocument = YAML.load('./swagger/staging.yaml')
 

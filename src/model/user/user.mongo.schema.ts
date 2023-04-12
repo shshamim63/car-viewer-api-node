@@ -16,7 +16,7 @@ const userSchema = new Schema<IUser>(
 
 const RefreshTokenSchema = new Schema<IRefreshToken>(
     {
-        userId: { type: String, required: true, unique: true },
+        userId: { type: String, required: true },
         token: { type: String, required: true },
     },
     { timestamps: true }

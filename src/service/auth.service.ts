@@ -19,11 +19,11 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
         email: body.email,
     }
 
-    let user = null
+    let user: IUser = null
     let authenticate = false
 
     try {
-        user = (await User.findOne(query)).toJSON() as IUser
+        user = await User.findOne(query)
         if (user)
             authenticate = await bcrypt.compare(
                 body.password,
@@ -43,7 +43,7 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
             `User does not exist with email: ${body.email}`
         )
     if (!authenticate)
-        throw new AppError(404, 'Invalid user credential', `Invalid password`)
+        throw new AppError(401, 'Invalid user credential', `Invalid password`)
 }
 
 export const registerUser = async (
