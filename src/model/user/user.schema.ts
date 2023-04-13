@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ROLE } from '../../const'
+import { ACTIVESTATUS, ROLE } from '../../const'
 
 const email = z.string().email()
 const username = z.string().min(6)
@@ -26,6 +26,7 @@ export const UserResponseSchema = z.object({
     id: z.string(),
     profileId: z.string().nullable().optional(),
     role: z.enum(ROLE),
+    status: z.enum(ACTIVESTATUS),
     updatedAt: z.date(),
     username: username,
 })

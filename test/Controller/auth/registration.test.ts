@@ -1,11 +1,12 @@
 import request from 'supertest'
 import { app } from '../../../src/app'
 
+import sgMail, { ClientResponse } from '@sendgrid/mail'
+
 import { IRegistrationBody } from '../../../src/model/user/user.model'
 import { User } from '../../../src/model/user/user.mongo.schema'
 
 describe('Auth/Registration', () => {
-    let user
     const requestBody = {} as IRegistrationBody
     describe('Registration Flow', () => {
         test('It should throw error, when empty request body is provided', async () => {
@@ -130,13 +131,13 @@ describe('Auth/Registration', () => {
         })
         describe('It should register a new user', () => {
             afterAll(async ()=> {
-                await User.deleteOne({_id: user.id})
+                await User.deleteOne({email: requestBody.email})
             })
             test('When all the field contains valid data should create a new user', async () => {
+                const sgMailSendMock = jest.spyOn(sgMail, 'send').mockRejectedValueOnce({})
                 requestBody['password'] = '123456789'
                 requestBody['confirmPassword'] = '123456789'
                 const response = await request(app).post('/user/registration').send(requestBody)
-                user = JSON.parse(response.res.text).message
                 expect(response.status).toEqual(201)
             })
             

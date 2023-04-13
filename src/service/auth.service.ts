@@ -13,6 +13,7 @@ import { SALTROUNDS } from '../const'
 import { authConfig } from '../config'
 
 import { convertToUserResponse } from '../presenter/auth.serialize'
+import { sendConfirmationEmail } from '../util/mailer'
 
 export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
     const query = {
@@ -48,7 +49,7 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
 
 export const registerUser = async (
     body: IRegistrationBody
-): Promise<IAuthenticatedUser> => {
+): Promise<string> => {
     const data: IUser = {
         email: body.email,
         passwordHash: await bcrypt.hashSync(body.password, SALTROUNDS),
@@ -57,7 +58,13 @@ export const registerUser = async (
     }
     try {
         const user = await createUser(data)
-        return await generateAuthenticatedUserInfo(user)
+        const userInfo = convertToUserResponse(user)
+        const activationToken = generateToken(
+            userInfo,
+            authConfig.accessTokenSecret
+        )
+        sendConfirmationEmail(userInfo.username, userInfo.email, activationToken)
+        return  'User was registered successfully! Please check your email'
     } catch (error) {
         if (error.code === 11000) {
             throw new AppError(
@@ -99,11 +106,15 @@ const generateAuthenticatedUserInfo = async (user: IUser) => {
 const generateToken = (
     user: IUser,
     token: string,
-    expiresIn: string
+    expiresIn: string = null
 ): string => {
-    return jwt.sign({ ...user, id: user.id }, token, {
-        expiresIn: expiresIn,
-    })
+    if(expiresIn) {
+        return jwt.sign({ ...user, id: user.id }, token, {
+            expiresIn: expiresIn,
+        })
+    } else {
+        return jwt.sign({ ...user, id: user.id }, token)
+    }
 }
 
 const createUser = async (data: IUser): Promise<IUser> => {

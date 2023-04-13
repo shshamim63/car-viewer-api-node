@@ -5,7 +5,6 @@ import { registerUser } from '../../../src/service/auth.service'
 import { User } from '../../../src/model/user/user.mongo.schema'
 
 describe('auth/login', () => {
-    let authenticateUser: IAuthenticatedUser
     let userData: IRegistrationBody
     
     beforeAll( async ()=> {
@@ -15,11 +14,11 @@ describe('auth/login', () => {
             password: '123456789',
             confirmPassword: '123456789',
         }
-        authenticateUser = await registerUser(userData)
+        await registerUser(userData)
     })
     
     afterAll(async ()=> {
-        await User.deleteOne({_id: authenticateUser.id})
+        await User.deleteOne({email: userData.email})
     })
     describe('Validate login credentials', () => {
         const loginRequestBody: ILoginBody = {}

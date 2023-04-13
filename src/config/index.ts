@@ -1,5 +1,6 @@
 export const appConfig = {
     port: process.env.PORT,
+    baseURL: process.env.BASE_URL
 }
 
 export const authConfig = {
@@ -9,4 +10,8 @@ export const authConfig = {
 
 export const mongoConfig = {
     mongoURL: process.env.MONGO_URI,
+}
+
+export const sendGridConfig = {
+    sendgridApiKey:  process.env.SENDGRID_API_KEY
 }

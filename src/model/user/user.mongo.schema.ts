@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose'
 import { IRefreshToken, IUser } from './user.model'
-import { ROLE } from '../../const'
+import { ACTIVESTATUS, ROLE } from '../../const'
 
 const userSchema = new Schema<IUser>(
     {
@@ -9,6 +9,7 @@ const userSchema = new Schema<IUser>(
         passwordHash: { type: String, required: true, unique: true },
         profileId: { type: String, required: false, default: null },
         role: { type: String, enum: ROLE, default: 'user' },
+        status: { type: String, enum: ACTIVESTATUS, default: 'Pending'},
         username: { type: String, required: true, unique: true },
     },
     { timestamps: true }
