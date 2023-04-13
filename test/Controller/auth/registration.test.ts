@@ -1,7 +1,7 @@
 import request from 'supertest'
 import { app } from '../../../src/app'
 
-import sgMail, { ClientResponse } from '@sendgrid/mail'
+import sgMail from '@sendgrid/mail'
 
 import { IRegistrationBody } from '../../../src/model/user/user.model'
 import { User } from '../../../src/model/user/user.mongo.schema'
@@ -134,7 +134,7 @@ describe('Auth/Registration', () => {
                 await User.deleteOne({email: requestBody.email})
             })
             test('When all the field contains valid data should create a new user', async () => {
-                const sgMailSendMock = jest.spyOn(sgMail, 'send').mockRejectedValueOnce({})
+                jest.spyOn(sgMail, 'send').mockRejectedValueOnce({})
                 requestBody['password'] = '123456789'
                 requestBody['confirmPassword'] = '123456789'
                 const response = await request(app).post('/user/registration').send(requestBody)
