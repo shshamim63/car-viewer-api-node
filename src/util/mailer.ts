@@ -8,7 +8,7 @@ export const sendConfirmationEmail = (name: string, email: string, activationTok
 
     const activationUrl = `${appConfig.baseURL}/activate/user?token=${activationToken}`
 
-    if(appConfig.env === 'development') console.log("Active Token, ")
+    if(appConfig.env === 'development') console.log("Activation_url", activationUrl)
 
     const msg = {
         to: email,

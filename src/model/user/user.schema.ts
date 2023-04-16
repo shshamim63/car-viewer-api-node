@@ -4,6 +4,10 @@ import { ACTIVESTATUS, ROLE } from '../../const'
 const email = z.string().email()
 const username = z.string().min(6)
 
+export const ActivateUserQuerySchema = z.object({
+    token: z.string().min(32)
+})
+
 export const LoginBodySchema = z.object({
     email: email,
     password: z.string().min(8),

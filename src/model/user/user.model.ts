@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import {
+    ActivateUserQuerySchema,
     AuthenticatedUserSchema,
     LoginBodySchema,
     RefreshTokenSchema,
@@ -8,6 +9,7 @@ import {
     UserSchema,
 } from './user.schema'
 
+export type IActivateUserQuery = z.infer<typeof ActivateUserQuerySchema>
 export type IUser = z.infer<typeof UserSchema>
 export type IRegistrationBody = z.infer<typeof RegistrationBodySchema>
 export type IUserResponse = z.infer<typeof UserResponseSchema>

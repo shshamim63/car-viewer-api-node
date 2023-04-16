@@ -5,10 +5,26 @@ import { schemaValidation } from '../util/schemaValidation'
 import { formatResponse } from '../util/formatResponse'
 
 import {
+    ActivateUserQuerySchema,
     LoginBodySchema,
     RegistrationBodySchema,
 } from '../model/user/user.schema'
-import { ILoginBody, IRegistrationBody } from '../model/user/user.model'
+import { IActivateUserQuery, ILoginBody, IRegistrationBody } from '../model/user/user.model'
+
+export const activateUserAccount = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const requestQuery: IActivateUserQuery= req.query
+        const data = schemaValidation(ActivateUserQuerySchema, requestQuery)
+        const response = await authService.activateUserAccount(data)
+        if (response) res.render(response)
+    } catch (error) {
+        next(error)
+    }
+}
 
 export const login = async (
     req: Request,

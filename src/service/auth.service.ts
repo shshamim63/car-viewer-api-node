@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
 import {
+    IActivateUserQuery,
     IAuthenticatedUser,
     ILoginBody,
     IRegistrationBody,
@@ -14,6 +15,12 @@ import { authConfig } from '../config'
 
 import { convertToUserResponse } from '../presenter/auth.serialize'
 import { sendConfirmationEmail } from '../util/mailer'
+
+export const activateUserAccount = async (query: IActivateUserQuery) => {
+    const decodedUser: IUser = verifyToken(query.token, authConfig.accessTokenSecret)
+    await findAndUpdateUser(decodedUser.id, { status: 'Active' })
+    return 'Successfully Activated user'
+}
 
 export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
     const query = {
@@ -80,6 +87,19 @@ export const registerUser = async (
 
 /*---------**Private Methods**--------*/
 
+const createUser = async (data: IUser): Promise<IUser> => {
+    const savedUser = await User.create(data)
+    return savedUser
+}
+
+const findAndUpdateUser = async (userId: string, body: IUser) => {
+    try {
+        User.findOneAndUpdate({id: userId}, body)
+    } catch (error) {
+        console.log('I user')
+    }
+}
+
 const generateAuthenticatedUserInfo = async (user: IUser) => {
     const userInfo = convertToUserResponse(user)
     const accessToken = generateToken(
@@ -117,12 +137,16 @@ const generateToken = (
     }
 }
 
-const createUser = async (data: IUser): Promise<IUser> => {
-    const savedUser = await User.create(data)
-    return savedUser
-}
-
 const saveRefreshToken = async (refreshToken: string, userId: string) => {
     const token = new RefreshToken({ userId: userId, token: refreshToken })
     await token.save()
+}
+
+const verifyToken = (token: string, secret: string): IUser => {
+    try {
+        const user = jwt.verify(token, secret)
+        return user as IUser
+    } catch (error) {
+        console.log("Error", error)
+    }
 }
