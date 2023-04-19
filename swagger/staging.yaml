@@ -34,7 +34,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/AuthenticatedUserResponse'
+                                $ref: '#/components/schemas/RegistrationSuccessResponse'
                 '400':
                     description: Bad Request
                     content:
@@ -224,6 +224,14 @@ components:
                 description: 
                     type: string
                     example: "Document with Id: ..... does not exist"
+        RegistrationSuccessResponse:
+            type: object
+            required:
+                - message
+            properties:
+                message:
+                    type: string
+                    example: User was registered successfully! Please check your email
         RegistrationRequestBody:
             allOf:
                 - $ref: '#/components/schemas/LoginRequestBody'
