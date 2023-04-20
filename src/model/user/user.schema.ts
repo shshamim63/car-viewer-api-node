@@ -4,6 +4,9 @@ import { ACTIVESTATUS, ROLE } from '../../const'
 const email = z.string().email()
 const username = z.string().min(6)
 
+export const ZodActiveStatusEnum = z.enum(ACTIVESTATUS);
+export const ZodRoleEnum = z.enum(ROLE);
+
 export const ActivateUserQuerySchema = z.object({
     token: z.string().min(32)
 })
@@ -29,8 +32,8 @@ export const UserResponseSchema = z.object({
     email: email,
     id: z.string(),
     profileId: z.string().nullable().optional(),
-    role: z.enum(ROLE),
-    status: z.enum(ACTIVESTATUS),
+    role: ZodRoleEnum,
+    status: ZodActiveStatusEnum,
     updatedAt: z.date(),
     username: username,
 })
@@ -45,7 +48,7 @@ export const AuthenticatedUserSchema = UserResponseSchema.merge(
     z.object({
         accessToken: z.string(),
         refreshToken: z.string(),
-        type: z.string(),
+        authorizationType: z.string(),
     })
 )
 

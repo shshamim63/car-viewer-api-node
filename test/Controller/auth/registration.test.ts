@@ -1,10 +1,10 @@
 import request from 'supertest'
 import { app } from '../../../src/app'
 
-import sgMail from '@sendgrid/mail'
+import * as authService from '../../../src/service/auth.service'
 
 import { IRegistrationBody } from '../../../src/model/user/user.model'
-import { User } from '../../../src/model/user/user.mongo.schema'
+import { AppError } from '../../../src/middlewares/appError'
 
 describe('Auth/Registration', () => {
     const requestBody = {} as IRegistrationBody
@@ -130,19 +130,25 @@ describe('Auth/Registration', () => {
             })
         })
         describe('It should register a new user', () => {
-            afterAll(async ()=> {
-                await User.deleteOne({email: requestBody.email})
-            })
             test('When all the field contains valid data should create a new user', async () => {
-                jest.spyOn(sgMail, 'send').mockRejectedValueOnce({})
+                const registerUserMock = jest.spyOn(authService, 'registerUser').mockResolvedValue('User was registered successfully! Please check your email')
                 requestBody['password'] = '123456789'
                 requestBody['confirmPassword'] = '123456789'
                 const response = await request(app).post('/user/registration').send(requestBody)
+                expect(registerUserMock).toHaveBeenCalled()
                 expect(response.status).toEqual(201)
             })
             
             test('It should throw error while creating duplicate user', async () => {
+                const registerUserMock = jest.spyOn(authService, 'registerUser').mockImplementation(() => {
+                    throw new AppError(
+                        409,
+                        'User already exists with the following',
+                        { email: requestBody.email }
+                    )
+                })
                 const response = await request(app).post('/user/registration').send(requestBody)
+                expect(registerUserMock).toHaveBeenCalled()
                 expect(response.error.status).toEqual(409)
             })
         })

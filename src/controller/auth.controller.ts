@@ -20,7 +20,7 @@ export const activateUserAccount = async (
         const requestQuery: IActivateUserQuery= req.query
         const data = schemaValidation(ActivateUserQuerySchema, requestQuery)
         const response = await authService.activateUserAccount(data)
-        if (response) res.render(response)
+        if (response) res.status(200).send(formatResponse(response))
     } catch (error) {
         next(error)
     }

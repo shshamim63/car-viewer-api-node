@@ -1,25 +1,30 @@
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+
+import * as userHelper from '../helper/user.helper'
 
 import {
     IActivateUserQuery,
     IAuthenticatedUser,
     ILoginBody,
     IRegistrationBody,
-    IUser,
-} from '../model/user/user.model'
-import { RefreshToken, User } from '../model/user/user.mongo.schema'
+    IUser} from '../model/user/user.model'
+import { User } from '../model/user/user.mongo.schema'
 import { AppError } from '../middlewares/appError'
 import { SALTROUNDS } from '../const'
 import { authConfig } from '../config'
 
 import { convertToUserResponse } from '../presenter/auth.serialize'
-import { sendConfirmationEmail } from '../util/mailer'
+import  * as mailer from '../util/mailer'
+import { ZodActiveStatusEnum } from '../model/user/user.schema'
+import { generateToken, verifyToken } from '../helper/jwt.helper'
 
 export const activateUserAccount = async (query: IActivateUserQuery) => {
     const decodedUser: IUser = verifyToken(query.token, authConfig.accessTokenSecret)
-    await findAndUpdateUser(decodedUser.id, { status: 'Active' })
-    return 'Successfully Activated user'
+    const currentUser = await userHelper.findOneUser({_id: decodedUser.id})
+    if(currentUser.status != 'Pending') throw new AppError(400, 'User is already active')
+    const updatedUser = await userHelper.findAndUpdateUserById(currentUser.id, { status: ZodActiveStatusEnum.Enum.Active })
+    console.log("Updated User", updatedUser)
+    return await userHelper.generateAuthenticatedUserInfo({...convertToUserResponse(updatedUser), status: ZodActiveStatusEnum.Enum.Active })
 }
 
 export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
@@ -31,14 +36,14 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
     let authenticate = false
 
     try {
-        user = await User.findOne(query)
+        user = await userHelper.findOneUser(query)
         if (user)
             authenticate = await bcrypt.compare(
                 body.password,
                 user.passwordHash
             )
         if (user && authenticate) {
-            return await generateAuthenticatedUserInfo(user)
+            return await userHelper.generateAuthenticatedUserInfo(user)
         }
     } catch (error) {
         throw new AppError(500, 'Server error')
@@ -64,13 +69,13 @@ export const registerUser = async (
         avatar: body.avatar ?? '',
     }
     try {
-        const user = await createUser(data)
+        const user = await userHelper.createUser(data)
         const userInfo = convertToUserResponse(user)
         const activationToken = generateToken(
             userInfo,
             authConfig.accessTokenSecret
         )
-        sendConfirmationEmail(userInfo.username, userInfo.email, activationToken)
+        mailer.sendConfirmationEmail(userInfo.username, userInfo.email, activationToken)
         return  'User was registered successfully! Please check your email'
     } catch (error) {
         if (error.code === 11000) {
@@ -82,71 +87,5 @@ export const registerUser = async (
         } else {
             throw new AppError(500, 'Server error')
         }
-    }
-}
-
-/*---------**Private Methods**--------*/
-
-const createUser = async (data: IUser): Promise<IUser> => {
-    const savedUser = await User.create(data)
-    return savedUser
-}
-
-const findAndUpdateUser = async (userId: string, body: IUser) => {
-    try {
-        User.findOneAndUpdate({id: userId}, body)
-    } catch (error) {
-        console.log('I user')
-    }
-}
-
-const generateAuthenticatedUserInfo = async (user: IUser) => {
-    const userInfo = convertToUserResponse(user)
-    const accessToken = generateToken(
-        userInfo,
-        authConfig.accessTokenSecret,
-        '15m'
-    )
-    const refreshToken = generateToken(
-        userInfo,
-        authConfig.refreshTokenSecret,
-        '1d'
-    )
-
-    if (refreshToken) {
-        await saveRefreshToken(refreshToken, userInfo.id)
-    }
-    return {
-        ...userInfo,
-        accessToken,
-        refreshToken,
-    }
-}
-
-const generateToken = (
-    user: IUser,
-    token: string,
-    expiresIn: string = null
-): string => {
-    if(expiresIn) {
-        return jwt.sign({ ...user, id: user.id }, token, {
-            expiresIn: expiresIn,
-        })
-    } else {
-        return jwt.sign({ ...user, id: user.id }, token)
-    }
-}
-
-const saveRefreshToken = async (refreshToken: string, userId: string) => {
-    const token = new RefreshToken({ userId: userId, token: refreshToken })
-    await token.save()
-}
-
-const verifyToken = (token: string, secret: string): IUser => {
-    try {
-        const user = jwt.verify(token, secret)
-        return user as IUser
-    } catch (error) {
-        console.log("Error", error)
     }
 }
