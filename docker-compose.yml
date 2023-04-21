@@ -13,8 +13,9 @@ services:
             - .:/app
         networks:
             - node-server
-        links:
-            - 'mongo'
+        depends_on:
+            - mongo
+            - redis
         env_file:
             - .env
     mongo:

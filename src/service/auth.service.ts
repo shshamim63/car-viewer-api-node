@@ -23,8 +23,7 @@ export const activateUserAccount = async (query: IActivateUserQuery) => {
     const currentUser = await userHelper.findOneUser({_id: decodedUser.id})
     if(currentUser.status != 'Pending') throw new AppError(400, 'User is already active')
     const updatedUser = await userHelper.findAndUpdateUserById(currentUser.id, { status: ZodActiveStatusEnum.Enum.Active })
-    console.log("Updated User", updatedUser)
-    return await userHelper.generateAuthenticatedUserInfo({...convertToUserResponse(updatedUser), status: ZodActiveStatusEnum.Enum.Active })
+    return await userHelper.generateAuthenticatedUserInfo({...updatedUser, status: ZodActiveStatusEnum.Enum.Active })
 }
 
 export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {

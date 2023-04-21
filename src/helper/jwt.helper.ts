@@ -23,7 +23,6 @@ export const verifyToken = (token: string, secret: string): IUser => {
         const user = jwt.verify(token, secret)
         return user as IUser
     } catch (error) {
-        console.log("Error", error)
         throw new AppError(401, 'Invalid authorization error')
     }
 }

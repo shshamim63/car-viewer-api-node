@@ -14,8 +14,8 @@ export const createUser = async (data: IUser): Promise<IUser> => {
 
 export const findOneUser = async (query: any) => {
     const user = await User.findOne(query)
-    if (user) return convertToUserResponse(user)
-    throw new AppError(404, "User doesn't exist")
+    if(!user || !Object.keys(user)) throw new AppError(404, "User doesn't exist")
+    return convertToUserResponse(user)
 }
 
 export const findAndUpdateUserById = async (id: string, body: IUser) => {
