@@ -2,7 +2,7 @@ name: Run Tests
 on:
     pull_request:
         types:
-          - opened
+            - opened
         branches: [master, staging]
     workflow_dispatch:
 jobs:

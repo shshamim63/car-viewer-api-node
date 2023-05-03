@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 
-import { IUser } from "../model/user/user.model"
+import { IUser } from '../model/user/user.model'
 import { AppError } from '../middlewares/appError'
 import { compareSync } from 'bcrypt'
 
@@ -9,7 +9,7 @@ export const generateToken = (
     token: string,
     expiresIn: string = null
 ): string => {
-    if(expiresIn) {
+    if (expiresIn) {
         return jwt.sign({ ...user, id: user.id }, token, {
             expiresIn: expiresIn,
         })

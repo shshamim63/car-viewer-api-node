@@ -7,11 +7,8 @@ import * as carRouters from './routes/cars'
 import * as authRoutes from './routes/auth'
 import { errorHandler } from './middlewares/errorHandler'
 import { invalidRouteHandler } from './middlewares/invalidRouteHandler'
-import { mongoConnect } from './config/mongoDB'
 
 const app = express()
-
-mongoConnect()
 
 app.use(
     bodyParser.urlencoded({
@@ -29,7 +26,7 @@ const options = {
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options))
 app.use(defaultRoutes.router)
 app.use(authRoutes.router)
-app.use(carRouters.router)
+app.use(carRouters.router,)
 app.use(invalidRouteHandler)
 
 app.use(errorHandler)

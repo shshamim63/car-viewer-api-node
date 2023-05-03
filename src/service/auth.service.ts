@@ -7,23 +7,33 @@ import {
     IAuthenticatedUser,
     ILoginBody,
     IRegistrationBody,
-    IUser} from '../model/user/user.model'
+    IUser,
+} from '../model/user/user.model'
 import { User } from '../model/user/user.mongo.schema'
 import { AppError } from '../middlewares/appError'
 import { SALTROUNDS } from '../const'
 import { authConfig } from '../config'
 
 import { convertToUserResponse } from '../presenter/auth.serialize'
-import  * as mailer from '../util/mailer'
+import * as mailer from '../util/mailer'
 import { ZodActiveStatusEnum } from '../model/user/user.schema'
 import { generateToken, verifyToken } from '../helper/jwt.helper'
 
 export const activateUserAccount = async (query: IActivateUserQuery) => {
-    const decodedUser: IUser = verifyToken(query.token, authConfig.accessTokenSecret)
-    const currentUser = await userHelper.findOneUser({_id: decodedUser.id})
-    if(currentUser.status != 'Pending') throw new AppError(400, 'User is already active')
-    const updatedUser = await userHelper.findAndUpdateUserById(currentUser.id, { status: ZodActiveStatusEnum.Enum.Active })
-    return await userHelper.generateAuthenticatedUserInfo({...updatedUser, status: ZodActiveStatusEnum.Enum.Active })
+    const decodedUser: IUser = verifyToken(
+        query.token,
+        authConfig.accessTokenSecret
+    )
+    const currentUser = await userHelper.findOneUser({ _id: decodedUser.id })
+    if (currentUser.status != 'Pending')
+        throw new AppError(400, 'User is already active')
+    const updatedUser = await userHelper.findAndUpdateUserById(currentUser.id, {
+        status: ZodActiveStatusEnum.Enum.Active,
+    })
+    return await userHelper.generateAuthenticatedUserInfo({
+        ...updatedUser,
+        status: ZodActiveStatusEnum.Enum.Active,
+    })
 }
 
 export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
@@ -74,8 +84,12 @@ export const registerUser = async (
             userInfo,
             authConfig.accessTokenSecret
         )
-        mailer.sendConfirmationEmail(userInfo.username, userInfo.email, activationToken)
-        return  'User was registered successfully! Please check your email'
+        mailer.sendConfirmationEmail(
+            userInfo.username,
+            userInfo.email,
+            activationToken
+        )
+        return 'User was registered successfully! Please check your email'
     } catch (error) {
         if (error.code === 11000) {
             throw new AppError(
@@ -87,4 +101,16 @@ export const registerUser = async (
             throw new AppError(500, 'Server error')
         }
     }
+}
+
+export const refreshToken = async (body: IActivateUserQuery) => {
+    const decodedUser: IUser = verifyToken(
+        body.token,
+        authConfig.refreshTokenSecret
+    )
+    const currentUser = await userHelper.findOneUser({ _id: decodedUser.id })
+    return await userHelper.generateAuthenticatedUserInfo({
+        ...currentUser,
+        status: ZodActiveStatusEnum.Enum.Active
+    })
 }

@@ -1,11 +1,11 @@
-import mongoose from "mongoose"
+import mongoose from 'mongoose'
 
-import { AppError } from "../middlewares/appError"
-import { IAuthenticatedUser, IUser } from "../model/user/user.model"
-import { RefreshToken, User } from "../model/user/user.mongo.schema"
-import { convertToUserResponse } from "../presenter/auth.serialize"
-import { authConfig } from "../config"
-import { generateToken } from "./jwt.helper"
+import { AppError } from '../middlewares/appError'
+import { IAuthenticatedUser, IUser } from '../model/user/user.model'
+import { RefreshToken, User } from '../model/user/user.mongo.schema'
+import { convertToUserResponse } from '../presenter/auth.serialize'
+import { authConfig } from '../config'
+import { generateToken } from './jwt.helper'
 
 export const createUser = async (data: IUser): Promise<IUser> => {
     const savedUser = await User.create(data)
@@ -14,20 +14,26 @@ export const createUser = async (data: IUser): Promise<IUser> => {
 
 export const findOneUser = async (query: any) => {
     const user = await User.findOne(query)
-    if(!user || !Object.keys(user)) throw new AppError(404, "User doesn't exist")
+    if (!user || !Object.keys(user))
+        throw new AppError(404, "User doesn't exist")
     return convertToUserResponse(user)
 }
 
 export const findAndUpdateUserById = async (id: string, body: IUser) => {
     try {
-        const response = await User.findOneAndUpdate(new mongoose.Types.ObjectId(id), body)
+        const response = await User.findOneAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            body
+        )
         return convertToUserResponse(response)
     } catch (error) {
         throw new AppError(404, "User doesn't exist")
     }
 }
 
-export const generateAuthenticatedUserInfo = async (user: IUser): Promise<IAuthenticatedUser> => {
+export const generateAuthenticatedUserInfo = async (
+    user: IUser
+): Promise<IAuthenticatedUser> => {
     const userInfo = convertToUserResponse(user)
     const accessToken = generateToken(
         userInfo,
@@ -50,7 +56,10 @@ export const generateAuthenticatedUserInfo = async (user: IUser): Promise<IAuthe
     }
 }
 
-export const saveRefreshToken = async (refreshToken: string, userId: string) => {
+export const saveRefreshToken = async (
+    refreshToken: string,
+    userId: string
+) => {
     const token = new RefreshToken({ userId: userId, token: refreshToken })
     await token.save()
 }

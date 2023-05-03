@@ -57,3 +57,20 @@ export const registerUser = async (
         next(error)
     }
 }
+
+export const refreshToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const requestBody: IActivateUserQuery= req.body
+        const body = schemaValidation(ActivateUserQuerySchema, requestBody)
+        if(body) {
+            const response = await authService.refreshToken(body)
+            if (response) res.status(200).send(formatResponse(response))
+        }
+    } catch (error) {
+        next(error)
+    }
+}

@@ -1,7 +1,7 @@
 export const appConfig = {
     port: process.env.PORT,
     baseURL: process.env.BASE_URL,
-    env: process.env.NODE_ENV
+    env: process.env.NODE_ENV,
 }
 
 export const authConfig = {
@@ -14,6 +14,6 @@ export const mongoConfig = {
 }
 
 export const sendGridConfig = {
-    sendgridApiKey:  process.env.SENDGRID_API_KEY,
-    sendgridSenderEmail:  process.env.SENDGRID_SENDER_EMAIL
+    sendgridApiKey: process.env.SENDGRID_API_KEY,
+    sendgridSenderEmail: process.env.SENDGRID_SENDER_EMAIL,
 }

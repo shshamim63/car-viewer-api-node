@@ -4,11 +4,11 @@ import { ACTIVESTATUS, ROLE } from '../../const'
 const email = z.string().email()
 const username = z.string().min(6)
 
-export const ZodActiveStatusEnum = z.enum(ACTIVESTATUS);
-export const ZodRoleEnum = z.enum(ROLE);
+export const ZodActiveStatusEnum = z.enum(ACTIVESTATUS)
+export const ZodRoleEnum = z.enum(ROLE)
 
 export const ActivateUserQuerySchema = z.object({
-    token: z.string().min(32)
+    token: z.string().min(32),
 })
 
 export const LoginBodySchema = z.object({

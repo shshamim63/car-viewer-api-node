@@ -99,7 +99,7 @@ describe('Auth/Registration', () => {
                     response._body.description.find((message) =>
                         message.path.includes('password')
                     ).message
-                ).toEqual('String must contain at least 8 character(s)')                
+                ).toEqual('String must contain at least 8 character(s)')
             })
 
             test('It should throw error when confirmPassword length is less than 8', async () => {
@@ -119,35 +119,49 @@ describe('Auth/Registration', () => {
             test('It should throw error when password and confirm password are not equal', async () => {
                 requestBody['password'] = '123456789'
                 requestBody['confirmPassword'] = '987654321'
-                const response = await request(app).post('/user/registration').send(requestBody)
+                const response = await request(app)
+                    .post('/user/registration')
+                    .send(requestBody)
                 expect(response._body.message).toEqual('Invalid Schema')
                 expect(response.error.status).toEqual(400)
                 expect(
-                    response._body.description.find((message) =>
-                        message.message === 'Password and confirm password must match'
+                    response._body.description.find(
+                        (message) =>
+                            message.message ===
+                            'Password and confirm password must match'
                     ).message
                 ).toEqual('Password and confirm password must match')
             })
         })
         describe('It should register a new user', () => {
             test('When all the field contains valid data should create a new user', async () => {
-                const registerUserMock = jest.spyOn(authService, 'registerUser').mockResolvedValue('User was registered successfully! Please check your email')
+                const registerUserMock = jest
+                    .spyOn(authService, 'registerUser')
+                    .mockResolvedValue(
+                        'User was registered successfully! Please check your email'
+                    )
                 requestBody['password'] = '123456789'
                 requestBody['confirmPassword'] = '123456789'
-                const response = await request(app).post('/user/registration').send(requestBody)
+                const response = await request(app)
+                    .post('/user/registration')
+                    .send(requestBody)
                 expect(registerUserMock).toHaveBeenCalled()
                 expect(response.status).toEqual(201)
             })
-            
+
             test('It should throw error while creating duplicate user', async () => {
-                const registerUserMock = jest.spyOn(authService, 'registerUser').mockImplementation(() => {
-                    throw new AppError(
-                        409,
-                        'User already exists with the following',
-                        { email: requestBody.email }
-                    )
-                })
-                const response = await request(app).post('/user/registration').send(requestBody)
+                const registerUserMock = jest
+                    .spyOn(authService, 'registerUser')
+                    .mockImplementation(() => {
+                        throw new AppError(
+                            409,
+                            'User already exists with the following',
+                            { email: requestBody.email }
+                        )
+                    })
+                const response = await request(app)
+                    .post('/user/registration')
+                    .send(requestBody)
                 expect(registerUserMock).toHaveBeenCalled()
                 expect(response.error.status).toEqual(409)
             })

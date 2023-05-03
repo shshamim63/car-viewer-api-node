@@ -1,13 +1,12 @@
-import { ConnectOptions, connect } from 'mongoose'
+import mongoose, { ConnectOptions } from 'mongoose';
 
 import { mongoConfig } from '.'
 
 const connectionURL = mongoConfig.mongoURL
 
-export const mongoConnect = async () => {
-    try {
-        await connect(connectionURL, { useNewUrlParser: true } as ConnectOptions)
-      } catch (error) {
-        console.log('error', error)
-      }
-}
+mongoose.connect(connectionURL, {
+    useNewUrlParser: true,
+} as ConnectOptions).then(() => { console.log('Connected To database :)')})
+.catch( err => console.log('error', err));
+
+module.exports = mongoose

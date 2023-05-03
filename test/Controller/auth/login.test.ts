@@ -3,14 +3,21 @@ import { app } from '../../../src/app'
 import mongoose from 'mongoose'
 
 import * as authService from '../../../src/service/auth.service'
-import { IAuthenticatedUser, ILoginBody, IRegistrationBody } from '../../../src/model/user/user.model'
+import {
+    IAuthenticatedUser,
+    ILoginBody,
+    IRegistrationBody,
+} from '../../../src/model/user/user.model'
 import { AppError } from '../../../src/middlewares/appError'
 import { generateToken } from '../../../src/helper/jwt.helper'
 import { authConfig } from '../../../src/config'
-import { ZodActiveStatusEnum, ZodRoleEnum } from '../../../src/model/user/user.schema'
+import {
+    ZodActiveStatusEnum,
+    ZodRoleEnum,
+} from '../../../src/model/user/user.schema'
 
 describe('auth/login', () => {
-    let loginData: IRegistrationBody = {
+    const loginData: IRegistrationBody = {
         email: 'demo15@gmail.com',
         username: 'demo123',
         password: '123456789',
@@ -29,20 +36,32 @@ describe('auth/login', () => {
         status: ZodActiveStatusEnum.Enum.Pending,
         updatedAt: new Date(),
         username: 'demo123',
-        authorizationType: 'Bearer'
-    } 
+        authorizationType: 'Bearer',
+    }
 
     const authenticatedUser: IAuthenticatedUser = {
         ...userData,
-        accessToken: generateToken(userData, authConfig.accessTokenSecret, '15m'),
-        refreshToken: generateToken(userData,authConfig.refreshTokenSecret,'1d'),
+        accessToken: generateToken(
+            userData,
+            authConfig.accessTokenSecret,
+            '15m'
+        ),
+        refreshToken: generateToken(
+            userData,
+            authConfig.refreshTokenSecret,
+            '1d'
+        ),
     }
-    
+
     describe('Validate login credentials', () => {
         const loginRequestBody: ILoginBody = {}
         test('It should throw error when request body does not contain any property', async () => {
-            const loginMock = jest.spyOn(authService, 'login').mockRejectedValue('Invalid Schema')
-            const response = await request(app).post('/user/login').send(loginRequestBody)
+            const loginMock = jest
+                .spyOn(authService, 'login')
+                .mockRejectedValue('Invalid Schema')
+            const response = await request(app)
+                .post('/user/login')
+                .send(loginRequestBody)
             expect(loginMock).not.toHaveBeenCalled()
             expect(response.error.status).toEqual(400)
             expect(response._body.message).toEqual('Invalid Schema')
@@ -61,29 +80,43 @@ describe('auth/login', () => {
         test('It should throw error when user with email does not exist', async () => {
             loginRequestBody['email'] = 'demo@gmail.com'
             loginRequestBody['password'] = '123456789'
-            const loginMock = jest.spyOn(authService, 'login').mockImplementation(() => {
-                throw new AppError(
-                    404,
-                    'Invalid user credential',
-                    `User does not exist with email: ${loginRequestBody.email}`
-                )
-            })
+            const loginMock = jest
+                .spyOn(authService, 'login')
+                .mockImplementation(() => {
+                    throw new AppError(
+                        404,
+                        'Invalid user credential',
+                        `User does not exist with email: ${loginRequestBody.email}`
+                    )
+                })
 
-            const response = await request(app).post('/user/login').send(loginRequestBody)
-            
+            const response = await request(app)
+                .post('/user/login')
+                .send(loginRequestBody)
+
             expect(loginMock).toHaveBeenCalled()
             expect(response.error.status).toEqual(404)
             expect(response._body.message).toEqual('Invalid user credential')
-            expect(response._body.description).toEqual(`User does not exist with email: ${loginRequestBody.email}`)
+            expect(response._body.description).toEqual(
+                `User does not exist with email: ${loginRequestBody.email}`
+            )
         })
 
         test('It should throw error when password is invalid', async () => {
-            const loginMock = jest.spyOn(authService, 'login').mockImplementation(() => {
-                throw new AppError(401, 'Invalid user credential', `Invalid password`)
-            })
+            const loginMock = jest
+                .spyOn(authService, 'login')
+                .mockImplementation(() => {
+                    throw new AppError(
+                        401,
+                        'Invalid user credential',
+                        `Invalid password`
+                    )
+                })
             loginRequestBody['email'] = loginData.email
             loginRequestBody['password'] = '987654123'
-            const response = await request(app).post('/user/login').send(loginRequestBody)
+            const response = await request(app)
+                .post('/user/login')
+                .send(loginRequestBody)
             expect(loginMock).toHaveBeenCalled()
             expect(response.error.status).toEqual(401)
             expect(response._body.message).toEqual('Invalid user credential')
@@ -91,10 +124,14 @@ describe('auth/login', () => {
         })
 
         test('It should return success response when receive valid credential', async () => {
-            const loginMock = jest.spyOn(authService, 'login').mockResolvedValue(authenticatedUser)
+            const loginMock = jest
+                .spyOn(authService, 'login')
+                .mockResolvedValue(authenticatedUser)
             loginRequestBody['email'] = loginData.email
             loginRequestBody['password'] = loginData.password
-            const response = await request(app).post('/user/login').send(loginRequestBody)
+            const response = await request(app)
+                .post('/user/login')
+                .send(loginRequestBody)
             expect(loginMock).toHaveBeenCalled()
             expect(response.status).toEqual(200)
         })
