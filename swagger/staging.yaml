@@ -23,7 +23,7 @@ paths:
     /user/registration:
         post:
             tags:
-                - 'Auth'
+              - 'Auth'
             summary: Registration path for users
             description: This route allows to create user in to system
             requestBody:
@@ -80,6 +80,43 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/InvalidResponse'
+    /activate/user:
+        post:
+            tags:
+                - 'Auth'
+            summary: User Activation Route
+            description: Allows user to activate the account through email
+            parameters:
+                - in: query
+                  name: token
+                  schema:
+                    type: string
+                  description: The number of items to skip before starting to collect the result set
+            responses:
+                '200':
+                    description: Returns a JSON object when creadentials are valid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AuthenticatedUserResponse'
+                '404':
+                    description: Not Found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/NotFoundResponse'
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UnAuthorizedResponse'
+                '400':
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InvalidResponse'
 components:
     requestBodies:
         RegistrationBody:
@@ -93,7 +130,7 @@ components:
             content:
                 application/json:
                     schema:
-                        $ref: '#/components/schemas/LoginRequestBody'
+                      $ref: '#/components/schemas/LoginRequestBody'
     schemas:
         ActiveMessage:
             type: object
@@ -148,9 +185,9 @@ components:
                     type: string
                     description: Identifier of authorization
                     enum:
-                        - user
-                        - admin
-                        - super
+                      - user
+                      - admin
+                      - super
                 type:
                     type: string
                     description: Authorization type
@@ -195,12 +232,12 @@ components:
                     example: invalid_string
                 message:
                     type: string
-                    example: Invalid email
+                    example:  Invalid email
                 path:
-                    type: array
-                    items:
-                        type: string
-                        example: email
+                  type: array
+                  items:
+                    type: string
+                    example: email
         LoginRequestBody:
             type: object
             required:
@@ -221,9 +258,9 @@ components:
                 message:
                     type: string
                     example: Record not found
-                description:
+                description: 
                     type: string
-                    example: 'Document with Id: ..... does not exist'
+                    example: "Document with Id: ..... does not exist"
         RegistrationSuccessResponse:
             type: object
             required:
@@ -258,7 +295,7 @@ components:
                 message:
                     type: string
                     example: Invalid user credential
-                description:
+                description: 
                     type: string
                     example: Invalid password
         UserExistResponse:

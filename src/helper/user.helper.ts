@@ -12,11 +12,12 @@ export const createUser = async (data: IUser): Promise<IUser> => {
     return savedUser
 }
 
-export const findOneUser = async (query: any) => {
+export const findOneUser = async (query: any): Promise<IUser | null> => {
     const user = await User.findOne(query)
-    if (!user || !Object.keys(user))
-        throw new AppError(404, "User doesn't exist")
-    return convertToUserResponse(user)
+    if (!user || !Object.keys(user).length) {
+        return null
+    }
+    return user
 }
 
 export const findAndUpdateUserById = async (id: string, body: IUser) => {
@@ -31,27 +32,34 @@ export const findAndUpdateUserById = async (id: string, body: IUser) => {
     }
 }
 
-export const generateAuthenticatedUserInfo = async (
-    user: IUser
-): Promise<IAuthenticatedUser> => {
-    const userInfo = convertToUserResponse(user)
+export const generateAccessInfo = async (user: IUser): Promise<Partial<IAuthenticatedUser>> => {
     const accessToken = generateToken(
-        userInfo,
+        user,
         authConfig.accessTokenSecret,
         '15m'
     )
+    return {
+        ...user,
+        accessToken,
+    }
+}
+
+export const generateAuthenticatedUserInfo = async (
+    user: IUser
+): Promise<IAuthenticatedUser> => {
+    const accessinfo = await generateAccessInfo(user)
     const refreshToken = generateToken(
-        userInfo,
+        user,
         authConfig.refreshTokenSecret,
         '1d'
     )
 
     if (refreshToken) {
-        await saveRefreshToken(refreshToken, userInfo.id)
+        await saveRefreshToken(refreshToken, user.id)
     }
+
     return {
-        ...userInfo,
-        accessToken,
+        ...accessinfo,
         refreshToken,
     }
 }

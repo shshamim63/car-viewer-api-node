@@ -9,7 +9,6 @@ import {
     IRegistrationBody,
     IUser,
 } from '../model/user/user.model'
-import { User } from '../model/user/user.mongo.schema'
 import { AppError } from '../middlewares/appError'
 import { SALTROUNDS } from '../const'
 import { authConfig } from '../config'
@@ -25,9 +24,16 @@ export const activateUserAccount = async (query: IActivateUserQuery) => {
         authConfig.accessTokenSecret
     )
     const currentUser = await userHelper.findOneUser({ _id: decodedUser.id })
-    if (currentUser.status != 'Pending')
+    if (!currentUser)
+        throw new AppError(
+            404,
+            'Invalid user credential',
+            `User does not exist with email: ${decodedUser.email}`
+        )
+    const currentUserInfo = convertToUserResponse(currentUser)
+    if (currentUserInfo.status != 'Pending')
         throw new AppError(400, 'User is already active')
-    const updatedUser = await userHelper.findAndUpdateUserById(currentUser.id, {
+    const updatedUser = await userHelper.findAndUpdateUserById(currentUserInfo.id, {
         status: ZodActiveStatusEnum.Enum.Active,
     })
     return await userHelper.generateAuthenticatedUserInfo({
@@ -44,6 +50,7 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
     let user: IUser = null
     let authenticate = false
 
+
     try {
         user = await userHelper.findOneUser(query)
         if (user)
@@ -51,9 +58,6 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
                 body.password,
                 user.passwordHash
             )
-        if (user && authenticate) {
-            return await userHelper.generateAuthenticatedUserInfo(user)
-        }
     } catch (error) {
         throw new AppError(500, 'Server error')
     }
@@ -66,6 +70,11 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
         )
     if (!authenticate)
         throw new AppError(401, 'Invalid user credential', `Invalid password`)
+    
+    if (user && authenticate) {
+        const userInfo = convertToUserResponse(user)
+        return await userHelper.generateAuthenticatedUserInfo(userInfo)
+    }
 }
 
 export const registerUser = async (
@@ -109,8 +118,13 @@ export const refreshToken = async (body: IActivateUserQuery) => {
         authConfig.refreshTokenSecret
     )
     const currentUser = await userHelper.findOneUser({ _id: decodedUser.id })
-    return await userHelper.generateAuthenticatedUserInfo({
-        ...currentUser,
-        status: ZodActiveStatusEnum.Enum.Active
-    })
+    if (!currentUser)
+        throw new AppError(
+            404,
+            'Invalid user credential',
+            `User does not exist with email: ${decodedUser.email}`
+        )
+    
+    const userInfo = convertToUserResponse(currentUser)
+    return await userHelper.generateAccessInfo(userInfo)
 }
