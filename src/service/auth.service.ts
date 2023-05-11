@@ -23,6 +23,7 @@ export const activateUserAccount = async (query: IActivateUserQuery) => {
         query.token,
         authConfig.accessTokenSecret
     )
+    console.log("Decoded User", decodedUser)
     const currentUser = await userHelper.findOneUser({ _id: decodedUser.id })
     if (!currentUser)
         throw new AppError(
@@ -30,12 +31,20 @@ export const activateUserAccount = async (query: IActivateUserQuery) => {
             'Invalid user credential',
             `User does not exist with email: ${decodedUser.email}`
         )
+
     const currentUserInfo = convertToUserResponse(currentUser)
+    //console.log("Current", currentUserInfo)
+
     if (currentUserInfo.status != 'Pending')
         throw new AppError(400, 'User is already active')
-    const updatedUser = await userHelper.findAndUpdateUserById(currentUserInfo.id, {
-        status: ZodActiveStatusEnum.Enum.Active,
-    })
+    
+    const updatedUser = await userHelper.findAndUpdateUserById(
+        currentUserInfo.id,
+        {
+            status: ZodActiveStatusEnum.Enum.Active,
+        }
+    )
+
     return await userHelper.generateAuthenticatedUserInfo({
         ...updatedUser,
         status: ZodActiveStatusEnum.Enum.Active,
@@ -49,7 +58,6 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
 
     let user: IUser = null
     let authenticate = false
-
 
     try {
         user = await userHelper.findOneUser(query)
@@ -70,7 +78,7 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
         )
     if (!authenticate)
         throw new AppError(401, 'Invalid user credential', `Invalid password`)
-    
+
     if (user && authenticate) {
         const userInfo = convertToUserResponse(user)
         return await userHelper.generateAuthenticatedUserInfo(userInfo)
@@ -124,7 +132,7 @@ export const refreshToken = async (body: IActivateUserQuery) => {
             'Invalid user credential',
             `User does not exist with email: ${decodedUser.email}`
         )
-    
+
     const userInfo = convertToUserResponse(currentUser)
     return await userHelper.generateAccessInfo(userInfo)
 }

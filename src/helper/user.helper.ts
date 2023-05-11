@@ -32,12 +32,10 @@ export const findAndUpdateUserById = async (id: string, body: IUser) => {
     }
 }
 
-export const generateAccessInfo = async (user: IUser): Promise<Partial<IAuthenticatedUser>> => {
-    const accessToken = generateToken(
-        user,
-        authConfig.accessTokenSecret,
-        '15m'
-    )
+export const generateAccessInfo = async (
+    user: IUser
+): Promise<Partial<IAuthenticatedUser>> => {
+    const accessToken = generateToken(user, authConfig.accessTokenSecret, '15m')
     return {
         ...user,
         accessToken,

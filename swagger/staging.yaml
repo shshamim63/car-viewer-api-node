@@ -23,7 +23,7 @@ paths:
     /user/registration:
         post:
             tags:
-              - 'Auth'
+                - 'Auth'
             summary: Registration path for users
             description: This route allows to create user in to system
             requestBody:
@@ -90,7 +90,7 @@ paths:
                 - in: query
                   name: token
                   schema:
-                    type: string
+                      type: string
                   description: The number of items to skip before starting to collect the result set
             responses:
                 '200':
@@ -130,7 +130,7 @@ components:
             content:
                 application/json:
                     schema:
-                      $ref: '#/components/schemas/LoginRequestBody'
+                        $ref: '#/components/schemas/LoginRequestBody'
     schemas:
         ActiveMessage:
             type: object
@@ -185,9 +185,9 @@ components:
                     type: string
                     description: Identifier of authorization
                     enum:
-                      - user
-                      - admin
-                      - super
+                        - user
+                        - admin
+                        - super
                 type:
                     type: string
                     description: Authorization type
@@ -232,12 +232,12 @@ components:
                     example: invalid_string
                 message:
                     type: string
-                    example:  Invalid email
+                    example: Invalid email
                 path:
-                  type: array
-                  items:
-                    type: string
-                    example: email
+                    type: array
+                    items:
+                        type: string
+                        example: email
         LoginRequestBody:
             type: object
             required:
@@ -258,9 +258,9 @@ components:
                 message:
                     type: string
                     example: Record not found
-                description: 
+                description:
                     type: string
-                    example: "Document with Id: ..... does not exist"
+                    example: 'Document with Id: ..... does not exist'
         RegistrationSuccessResponse:
             type: object
             required:
@@ -295,7 +295,7 @@ components:
                 message:
                     type: string
                     example: Invalid user credential
-                description: 
+                description:
                     type: string
                     example: Invalid password
         UserExistResponse:

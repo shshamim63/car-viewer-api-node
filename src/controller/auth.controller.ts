@@ -9,7 +9,11 @@ import {
     LoginBodySchema,
     RegistrationBodySchema,
 } from '../model/user/user.schema'
-import { IActivateUserQuery, ILoginBody, IRegistrationBody } from '../model/user/user.model'
+import {
+    IActivateUserQuery,
+    ILoginBody,
+    IRegistrationBody,
+} from '../model/user/user.model'
 
 export const activateUserAccount = async (
     req: Request,
@@ -17,7 +21,7 @@ export const activateUserAccount = async (
     next: NextFunction
 ) => {
     try {
-        const requestQuery: IActivateUserQuery= req.query
+        const requestQuery: IActivateUserQuery = req.query
         const data = schemaValidation(ActivateUserQuerySchema, requestQuery)
         const response = await authService.activateUserAccount(data)
         if (response) res.status(200).send(formatResponse(response))
@@ -64,9 +68,9 @@ export const refreshToken = async (
     next: NextFunction
 ) => {
     try {
-        const requestBody: IActivateUserQuery= req.body
+        const requestBody: IActivateUserQuery = req.body
         const body = schemaValidation(ActivateUserQuerySchema, requestBody)
-        if(body) {
+        if (body) {
             const response = await authService.refreshToken(body)
             if (response) res.status(200).send(formatResponse(response))
         }

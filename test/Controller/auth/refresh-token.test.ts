@@ -32,19 +32,15 @@ describe('activate/user', () => {
         expect(response.error.status).toEqual(400)
     })
 
-    test('it should activate the user account', async () => {
+    test('it should create a new token', async () => {
         const userHelperMock = jest
             .spyOn(userHelper, 'findOneUser')
             .mockResolvedValue(userData)
-        const generateAuthenticatedUserInfoMock = jest
-            .spyOn(userHelper, 'generateAuthenticatedUserInfo')
-            .mockResolvedValueOnce(userData)
         const token = generateToken(userData, authConfig.refreshTokenSecret)
         const response = await request(app).post(`/refresh/token`).send({
-            token: token
+            token: token,
         })
         expect(userHelperMock).toHaveBeenCalled()
-        expect(generateAuthenticatedUserInfoMock).toHaveBeenCalled()
         expect(response.status).toEqual(200)
     })
 })

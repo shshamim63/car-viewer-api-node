@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken'
 
 import { IUser } from '../model/user/user.model'
 import { AppError } from '../middlewares/appError'
-import { compareSync } from 'bcrypt'
 
 export const generateToken = (
     user: IUser,

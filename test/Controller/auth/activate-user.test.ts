@@ -43,7 +43,9 @@ describe('activate/user', () => {
             .spyOn(userHelper, 'generateAuthenticatedUserInfo')
             .mockResolvedValueOnce(userData)
         const token = generateToken(userData, authConfig.accessTokenSecret)
-        const response = await request(app).post(`/activate/user?token=${token}`)
+        const response = await request(app).post(
+            `/activate/user?token=${token}`
+        )
         expect(userHelperMock).toHaveBeenCalled()
         expect(findAndUpdateUserByIdMock).toHaveBeenCalled()
         expect(generateAuthenticatedUserInfoMock).toHaveBeenCalled()
@@ -53,20 +55,12 @@ describe('activate/user', () => {
     test('It should throw error when trying to activate the same user', async () => {
         const userHelperMock = jest
             .spyOn(userHelper, 'findOneUser')
-            .mockResolvedValue({
-                ...userData,
-                status: ZodActiveStatusEnum.Enum.Pending,
-            })
-        const findAndUpdateUserByIdMock = jest
-            .spyOn(userHelper, 'findAndUpdateUserById')
-            .mockResolvedValue({
-                ...userData,
-                status: ZodActiveStatusEnum.Enum.Pending,
-            })
-        expect(userHelperMock).toHaveBeenCalled()
-        expect(findAndUpdateUserByIdMock).toHaveBeenCalled()
+            .mockResolvedValue({ ...userData, status: ZodActiveStatusEnum.Enum.Active })
         const token = generateToken(userData, authConfig.accessTokenSecret)
-        const response = await request(app).post(`/activate/user?token=${token}`)
+        const response = await request(app).post(
+            `/activate/user?token=${token}`
+        )
+        expect(userHelperMock).toHaveBeenCalled()
         expect(response.error.status).toEqual(400)
     })
 })
