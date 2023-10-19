@@ -23,8 +23,9 @@ export const activateUserAccount = async (query: IActivateUserQuery) => {
         query.token,
         authConfig.accessTokenSecret
     )
-    console.log("Decoded User", decodedUser)
+
     const currentUser = await userHelper.findOneUser({ _id: decodedUser.id })
+    
     if (!currentUser)
         throw new AppError(
             404,
@@ -33,11 +34,10 @@ export const activateUserAccount = async (query: IActivateUserQuery) => {
         )
 
     const currentUserInfo = convertToUserResponse(currentUser)
-    //console.log("Current", currentUserInfo)
 
     if (currentUserInfo.status != 'Pending')
         throw new AppError(400, 'User is already active')
-    
+
     const updatedUser = await userHelper.findAndUpdateUserById(
         currentUserInfo.id,
         {
@@ -94,6 +94,7 @@ export const registerUser = async (
         username: body.username,
         avatar: body.avatar ?? '',
     }
+
     try {
         const user = await userHelper.createUser(data)
         const userInfo = convertToUserResponse(user)
@@ -115,6 +116,7 @@ export const registerUser = async (
                 error.keyValue
             )
         } else {
+            console.log(error)
             throw new AppError(500, 'Server error')
         }
     }

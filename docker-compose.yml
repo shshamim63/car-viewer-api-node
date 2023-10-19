@@ -34,6 +34,13 @@ services:
             - 6379:6379
         volumes:
             - myredis:/usr/local/etc/redis
+    adminer:
+        image: adminer
+        restart: always
+        networks:
+            - node-server
+        ports:
+            - 8080:8080
 networks:
     node-server:
 volumes:
