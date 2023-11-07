@@ -1,9 +1,9 @@
 import { dbFirestore } from '../config/firebaseDB'
 import { CarRef } from '../config/firebaseDB'
-import { Car } from '../model/car/cars.model'
+import { ICar } from '../model/car/cars.model'
 import { AppError } from '../middlewares/appError'
 
-export const createCarRecord = async (body: Car): Promise<string> => {
+export const createCarRecord = async (body: ICar): Promise<string> => {
     try {
         await CarRef.doc().set({
             ...body,

@@ -3,7 +3,7 @@ import { CarSchema } from '../model/car/cars.schema'
 import { schemaValidation } from '../util/schemaValidation'
 
 import * as carService from '../service/car.service'
-import { Car } from '../model/car/cars.model'
+import { ICar } from '../model/car/cars.model'
 import { formatResponse } from '../util/formatResponse'
 
 export const createCarRecord = async (
@@ -12,7 +12,7 @@ export const createCarRecord = async (
     next: NextFunction
 ) => {
     try {
-        const body = schemaValidation(CarSchema, req.body) as unknown as Car
+        const body = schemaValidation(CarSchema, req.body) as unknown as ICar
         const response = await carService.createCarRecord(body)
         if (response) res.status(200).send(formatResponse(response))
     } catch (error) {
