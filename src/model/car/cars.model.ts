@@ -1,5 +1,12 @@
 import { z } from 'zod'
-import { CarSchema, CarBrandSchema } from './cars.schema'
+import {
+    CarRequestBodySchema,
+    MongoCarSchema,
+    MongoCarBrandSchema,
+    CarBrandRequestBodySchema,
+} from './cars.schema'
 
-export type ICar = z.infer<typeof CarSchema>
-export type ICarBrand = z.infer<typeof CarBrandSchema>
+export type IMongoCar = z.infer<typeof MongoCarSchema>
+export type IMongoCarBrand = z.infer<typeof MongoCarBrandSchema>
+export type ICarRequestBody = z.infer<typeof CarRequestBodySchema>
+export type ICarBrandRequestBody = z.infer<typeof CarBrandRequestBodySchema>

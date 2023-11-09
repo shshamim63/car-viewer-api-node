@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-import { AppError } from '../middlewares/appError'
+import { AppError } from '../util/appError'
 import { IAuthenticatedUser, IUser } from '../model/user/user.model'
 import { RefreshToken, User } from '../model/user/user.mongo.schema'
 import { convertToUserResponse } from '../presenter/auth.serialize'

@@ -1,7 +1,6 @@
 import { NextFunction, Response, Request } from 'express'
-import { AppError } from './appError'
 
-export const invalidRouteHandler = (
+export const invalidRouteMiddleware = (
     req: Request,
     res: Response,
     next: NextFunction

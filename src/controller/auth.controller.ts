@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 
 import * as authService from '../service/auth.service'
-import { schemaValidation } from '../util/schemaValidation'
-import { formatResponse } from '../util/formatResponse'
+import { schemaValidation } from '../helper/schemaValidation'
+import { formatResponse } from '../helper/formatResponse.helper'
 
 import {
     ActivateUserQuerySchema,

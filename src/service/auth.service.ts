@@ -9,7 +9,7 @@ import {
     IRegistrationBody,
     IUser,
 } from '../model/user/user.model'
-import { AppError } from '../middlewares/appError'
+import { AppError } from '../util/appError'
 import { SALTROUNDS } from '../const'
 import { authConfig } from '../config'
 
@@ -25,7 +25,7 @@ export const activateUserAccount = async (query: IActivateUserQuery) => {
     )
 
     const currentUser = await userHelper.findOneUser({ _id: decodedUser.id })
-    
+
     if (!currentUser)
         throw new AppError(
             404,

@@ -8,8 +8,9 @@ require('./config/mongoDB')
 import * as defaultRoutes from './routes/default'
 import * as carRouters from './routes/cars'
 import * as authRoutes from './routes/auth'
-import { errorHandler } from './middlewares/errorHandler'
-import { invalidRouteHandler } from './middlewares/invalidRouteHandler'
+import { errorHandlerMiddleware } from './middlewares/errorHandler.middleware'
+import { invalidRouteMiddleware } from './middlewares/invalidRoute.middleware'
+import { corsMiddleware } from './middlewares/cors.middleware'
 
 const app = express()
 
@@ -26,12 +27,14 @@ const options = {
     explorer: true,
 }
 
+app.use(corsMiddleware)
+
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options))
 app.use(defaultRoutes.router)
 app.use(authRoutes.router)
 app.use(carRouters.router)
-app.use(invalidRouteHandler)
+app.use(invalidRouteMiddleware)
 
-app.use(errorHandler)
+app.use(errorHandlerMiddleware)
 
 export { app }

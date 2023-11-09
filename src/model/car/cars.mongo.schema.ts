@@ -1,14 +1,22 @@
-import {model, Schema} from "mongoose";
-import {ICar} from "./cars.model";
-import {string, z} from "zod";
+import { model, Schema } from 'mongoose'
+import { IMongoCar, IMongoCarBrand } from './cars.model'
 
-const carSchema = new Schema<ICar>(
+const carSchema = new Schema<IMongoCar>(
     {
         name: { type: String, required: true, index: { unique: true } },
-        manufacturedAt: { type: String, required: true },
-        images: {type: [String], default: []},
+        manufacturing_year: { type: String, required: true },
+        images: { type: [String], default: [] },
+        type: { type: String, default: '' },
     },
     { timestamps: true }
 )
 
-export const Car = model<ICar>('Car', carSchema)
+const carBrandSchema = new Schema<IMongoCarBrand>({
+    avatar: { type: String, required: false },
+    name: { type: String, required: true },
+    founded: { type: String, required: true },
+    founder: { type: String, required: true },
+})
+
+export const Car = model<IMongoCar>('Car', carSchema)
+export const CarBrand = model<IMongoCarBrand>('CarBrand', carBrandSchema)
