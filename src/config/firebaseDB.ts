@@ -10,5 +10,3 @@ initializeApp({
 export const dbFirestore = firestore
 
 export const db = dbFirestore()
-
-export const CarRef = db.collection('Cars')
