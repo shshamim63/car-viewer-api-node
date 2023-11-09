@@ -8,7 +8,7 @@ import {
     ILoginBody,
     IRegistrationBody,
 } from '../../../src/model/user/user.model'
-import { AppError } from '../../../src/middlewares/appError'
+import { AppError } from '../../../src/util/appError'
 import { generateToken } from '../../../src/helper/jwt.helper'
 import { authConfig } from '../../../src/config'
 import {

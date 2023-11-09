@@ -4,7 +4,7 @@ import { app } from '../../../src/app'
 import * as authService from '../../../src/service/auth.service'
 
 import { IRegistrationBody } from '../../../src/model/user/user.model'
-import { AppError } from '../../../src/middlewares/appError'
+import { AppError } from '../../../src/util/appError'
 
 describe('Auth/Registration', () => {
     const requestBody = {} as IRegistrationBody
