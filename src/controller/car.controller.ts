@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express'
 
-import { schemaValidation } from '../helper/schemaValidation'
+import { schemaValidation } from '../util/schemaValidation'
 
 import * as carService from '../service/car.service'
-import { formatResponse } from '../helper/formatResponse.helper'
+import { formatResponse } from '../util/formatResponse'
 
 import {
     CarBrandRequestBodySchema,

@@ -1,5 +1,5 @@
 import { ZodSchema } from 'zod'
-import { AppError } from '../util/appError'
+import { AppError } from './appError'
 
 export const schemaValidation = <T>(schema: ZodSchema, body: T): T => {
     try {

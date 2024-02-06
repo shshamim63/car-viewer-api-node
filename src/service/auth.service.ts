@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt'
 
-import * as userHelper from '../helper/user.helper'
+import * as userDB from '../dataAccess/user.db'
 
 import {
     IActivateUserQuery,
@@ -15,8 +15,9 @@ import { authConfig } from '../config'
 
 import { convertToUserResponse } from '../presenter/auth.serialize'
 import * as mailer from '../util/mailer'
+
 import { ZodActiveStatusEnum } from '../model/user/user.schema'
-import { generateToken, verifyToken } from '../helper/jwt.helper'
+import { generateToken, verifyToken } from '../util/jwt'
 
 export const activateUserAccount = async (query: IActivateUserQuery) => {
     const decodedUser: IUser = verifyToken(
@@ -24,7 +25,7 @@ export const activateUserAccount = async (query: IActivateUserQuery) => {
         authConfig.accessTokenSecret
     )
 
-    const currentUser = await userHelper.findOneUser({ _id: decodedUser.id })
+    const currentUser = await userDB.findOneUser({ _id: decodedUser.id })
 
     if (!currentUser)
         throw new AppError(
@@ -38,14 +39,11 @@ export const activateUserAccount = async (query: IActivateUserQuery) => {
     if (currentUserInfo.status != 'Pending')
         throw new AppError(400, 'User is already active')
 
-    const updatedUser = await userHelper.findAndUpdateUserById(
-        currentUserInfo.id,
-        {
-            status: ZodActiveStatusEnum.Enum.Active,
-        }
-    )
+    const updatedUser = await userDB.findAndUpdateUserById(currentUserInfo.id, {
+        status: ZodActiveStatusEnum.Enum.Active,
+    })
 
-    return await userHelper.generateAuthenticatedUserInfo({
+    return await userDB.generateAuthenticatedUserInfo({
         ...updatedUser,
         status: ZodActiveStatusEnum.Enum.Active,
     })
@@ -60,7 +58,7 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
     let authenticate = false
 
     try {
-        user = await userHelper.findOneUser(query)
+        user = await userDB.findOneUser(query)
         if (user)
             authenticate = await bcrypt.compare(
                 body.password,
@@ -81,7 +79,7 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
 
     if (user && authenticate) {
         const userInfo = convertToUserResponse(user)
-        return await userHelper.generateAuthenticatedUserInfo(userInfo)
+        return await userDB.generateAuthenticatedUserInfo(userInfo)
     }
 }
 
@@ -96,7 +94,7 @@ export const registerUser = async (
     }
 
     try {
-        const user = await userHelper.createUser(data)
+        const user = await userDB.createUser(data)
         const userInfo = convertToUserResponse(user)
         const activationToken = generateToken(
             userInfo,
@@ -107,16 +105,17 @@ export const registerUser = async (
             userInfo.email,
             activationToken
         )
-        return 'User was registered successfully! Please check your email'
+        return 'Registration successful, please check email to verify your account'
     } catch (error) {
         if (error.code === 11000) {
             throw new AppError(
                 409,
-                'User already exists with the following',
+                `User exists with the following ${JSON.stringify(
+                    error.keyValue
+                )}`,
                 error.keyValue
             )
         } else {
-            console.log(error)
             throw new AppError(500, 'Server error')
         }
     }
@@ -127,7 +126,7 @@ export const refreshToken = async (body: IActivateUserQuery) => {
         body.token,
         authConfig.refreshTokenSecret
     )
-    const currentUser = await userHelper.findOneUser({ _id: decodedUser.id })
+    const currentUser = await userDB.findOneUser({ _id: decodedUser.id })
     if (!currentUser)
         throw new AppError(
             404,
@@ -136,5 +135,5 @@ export const refreshToken = async (body: IActivateUserQuery) => {
         )
 
     const userInfo = convertToUserResponse(currentUser)
-    return await userHelper.generateAccessInfo(userInfo)
+    return await userDB.generateAccessInfo(userInfo)
 }

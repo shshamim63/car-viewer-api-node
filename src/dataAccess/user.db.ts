@@ -5,7 +5,7 @@ import { IAuthenticatedUser, IUser } from '../model/user/user.model'
 import { RefreshToken, User } from '../model/user/user.mongo.schema'
 import { convertToUserResponse } from '../presenter/auth.serialize'
 import { authConfig } from '../config'
-import { generateToken } from './jwt.helper'
+import { generateToken } from '../util/jwt'
 
 export const createUser = async (data: IUser): Promise<IUser> => {
     const savedUser = await User.create(data)

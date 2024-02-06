@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 
 import { IUser } from '../model/user/user.model'
-import { AppError } from '../util/appError'
+import { AppError } from './appError'
 
 export const generateToken = (
     user: IUser,
