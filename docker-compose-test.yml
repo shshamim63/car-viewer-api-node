@@ -15,7 +15,6 @@ services:
             - node-server
         depends_on:
             - mongo
-            - redis
     mongo:
         image: mongo
         ports:
