@@ -1,16 +1,18 @@
-openapi: 3.0.0
+security:
+    - bearerAuth: []
+openapi: 3.0.3
 info:
-  title: Sample API
-  description: Optional multiline or single-line description in HTML.
-  version: 0.1.9
+    title: Sample API
+    description: Optional multiline or single-line description in HTML.
+    version: 0.1.9
 servers:
-  - url: http://localhost:3000
-    description: Internal staging server for testing
+    - url: http://localhost:3000
+      description: Internal staging server for testing
 paths:
     /:
         get:
             tags:
-                - 'Default'
+                - Default
             summary: The root path of the service
             description: This route provides the indication that the server is running appropriately
             responses:
@@ -20,7 +22,117 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ActiveMessage'
+    /user/registration:
+        post:
+            tags:
+                - Auth
+            summary: Registration path for users
+            description: This route allows to create user in to system
+            requestBody:
+                $ref: '#/components/requestBodies/RegistrationBody'
+            responses:
+                '201':
+                    description: Retrun a JSON object when record created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RegistrationSuccessResponse'
+                '400':
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InvalidResponse'
+                '409':
+                    description: Conflict Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserExistResponse'
+    /user/login:
+        post:
+            tags:
+                - Auth
+            summary: Login Route
+            description: Allows user to authenticate and access service with access token
+            requestBody:
+                $ref: '#/components/requestBodies/LoginBody'
+            responses:
+                '200':
+                    description: Returns a JSON object when creadentials are valid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AuthenticatedUserResponse'
+                '404':
+                    description: Not Found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/NotFoundResponse'
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UnAuthorizedResponse'
+                '400':
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InvalidResponse'
+    /activate/user:
+        post:
+            tags:
+                - Auth
+            summary: User Activation Route
+            description: Allows user to activate the account through email
+            parameters:
+                - in: query
+                  name: token
+                  schema:
+                      type: string
+                  description: The number of items to skip before starting to collect the result set
+            responses:
+                '200':
+                    description: Returns a JSON object when creadentials are valid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AuthenticatedUserResponse'
+                '404':
+                    description: Not Found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/NotFoundResponse'
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UnAuthorizedResponse'
+                '400':
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InvalidResponse'
 components:
+    requestBodies:
+        RegistrationBody:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/RegistrationRequestBody'
+        LoginBody:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/LoginRequestBody'
     schemas:
         ActiveMessage:
             type: object
@@ -29,3 +141,176 @@ components:
                     type: string
                     description: Message from the server.
                     example: App server is running successfully
+        AuthenticatedUserResponse:
+            type: object
+            required:
+                - message
+            properties:
+                message:
+                    $ref: '#/components/schemas/AuthenticatedUser'
+        AuthenticatedUser:
+            type: object
+            required:
+                - avatar
+                - createdAt
+                - email
+                - id
+                - profileId
+                - role
+                - type
+                - updatedAt
+                - username
+                - accessToken
+                - refreshToken
+            properties:
+                avatar:
+                    type: string
+                    description: URL of the user's profile picture
+                    example: https://user:101/profile/picture
+                createdAt:
+                    type: string
+                    description: Created time of the document
+                    example: 2023-04-12T09:25:08.318Z
+                email:
+                    type: string
+                    description: Email of the user.
+                    example: demo@gmail.com
+                id:
+                    type: string
+                    description: User Identifier
+                    example: 643678f444b0cc799b8b4ab3
+                profileId:
+                    type: string
+                    description: User's profile Identifier
+                    example: 643678f444b0cc799455665
+                role:
+                    type: string
+                    description: Identifier of authorization
+                    enum:
+                        - user
+                        - admin
+                        - super
+                type:
+                    type: string
+                    description: Authorization type
+                    example: Bearer
+                updatedAt:
+                    type: string
+                    description: Last Ureated time of the document
+                    example: 2023-04-12T09:25:08.318Z
+                username:
+                    type: string
+                    description: Username of the user account.
+                    example: demo1212
+                accessToken:
+                    type: string
+                    description: Access Token
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.....
+                refreshToken:
+                    type: string
+                    description: Refresh Token
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.....
+        InvalidResponse:
+            type: object
+            required:
+                - message
+                - description
+            properties:
+                message:
+                    type: string
+                    example: Invalid Schema
+                description:
+                    type: array
+                    maxItems: 5
+                    items:
+                        $ref: '#/components/schemas/InvalidSchema'
+        InvalidSchema:
+            type: object
+            properties:
+                validation:
+                    type: string
+                    example: email
+                code:
+                    type: string
+                    example: invalid_string
+                message:
+                    type: string
+                    example: Invalid email
+                path:
+                    type: array
+                    maxItems: 10
+                    items:
+                        type: string
+                        example: email
+        LoginRequestBody:
+            type: object
+            required:
+                - email
+                - password
+            properties:
+                email:
+                    type: string
+                    description: Email of the user.
+                    example: demo@gmail.com
+                password:
+                    type: string
+                    description: Password of the user.
+                    example: 123456789
+        NotFoundResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: Record not found
+                description:
+                    type: string
+                    example: 'Document with Id: ..... does not exist'
+        RegistrationSuccessResponse:
+            type: object
+            required:
+                - message
+            properties:
+                message:
+                    type: string
+                    example: User was registered successfully! Please check your email
+        RegistrationRequestBody:
+            allOf:
+                - $ref: '#/components/schemas/LoginRequestBody'
+                - type: object
+                  required:
+                      - confirmPassword
+                      - username
+                  properties:
+                      confirmPassword:
+                          type: string
+                          description: Confirmation of Password.
+                          example: 123456789
+                      username:
+                          type: string
+                          description: Username of the user account.
+                          example: demo1212
+                      avatar:
+                          type: string
+                          description: URL of the user's profile picture.
+                          example: https://user:101/profile/picture
+        UnAuthorizedResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: Invalid user credential
+                description:
+                    type: string
+                    example: Invalid password
+        UserExistResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: User already exists with the following
+                description:
+                    type: object
+                    properties:
+                        email:
+                            type: string
+                            example: demo@gmail.com

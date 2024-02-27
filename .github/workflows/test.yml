@@ -1,18 +1,42 @@
 name: Run Tests
+
 on:
-  pull_request:
-    branches: [ master, staging ]
+    pull_request:
+        branches:
+            - main
+            - staging
+    push:
+        branches:
+            - main
+permissions: read-all
 jobs:
-    test:
+    build:
         runs-on: ubuntu-latest
+
+        services:
+            mongodb:
+                image: mongo
+                ports:
+                    - 27017:27017
+                options: --name mongodb
+
+        env:
+            MONGO_URI: mongodb://localhost:27017/logistic
+            ACCESS_TOKEN_SECRET: aa6db53b9d83fb0fc5b960ee33a10f5fec3670cc92f616649fe2279051f37ca0e73a9778fc9d1421150ea2db7bea6a1dfeaf57883473bad87212c504409d5cd7
+            REFRESH_TOKEN_SECRET: c8448c09acb0b824541d45eb0820a6912cd20d23f06a3f49ef49cb606674dbc4e572de6a1b78bb896032b5c2bfff488dc328774b07ec0b1ef2bce0183e3c3e25
+            SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+            SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
         steps:
-            - name: Get code
-              uses: actions/checkout@v3
-            - name: Install NodeJS
-              uses: actions/setup-node@v3
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
               with:
-                  node-version: 18
+                  node-version: '20.x'
+
             - name: Install Dependencies
-              run: npm ci
-            - name: Run tests
-              run: npm run test
+              run: npm install
+
+            - name: Run Tests
+              run: npm test

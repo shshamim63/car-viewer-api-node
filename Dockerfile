@@ -1,13 +1,11 @@
-FROM node:latest
-
+FROM alpine:3.18
+RUN adduser -D myuser
+RUN apk add --no-cache nodejs npm
 WORKDIR /app
-
-ADD package.json ./
-
-RUN npm install
-
+COPY package.json ./
+RUN npm install --omit=dev
 COPY . .
-
+HEALTHCHECK --interval=35s --timeout=4s CMD curl -f https://localhost/ || exit 1
 EXPOSE 3000
-
+USER myuser
 CMD [ "npm", "run", "dev" ]

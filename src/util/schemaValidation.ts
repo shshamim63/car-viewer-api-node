@@ -1,10 +1,10 @@
-import { ZodSchema } from "zod";
-import { AppError } from "./appError";
+import { ZodSchema } from 'zod'
+import { AppError } from './appError'
 
-export const schemaValidation = (schema: ZodSchema, body: any) => {
-  try {
-    return schema.parse(body)
-  } catch (error) {
-    throw new AppError(400, 'Invalid Schema', error.errors)
-  }
+export const schemaValidation = <T>(schema: ZodSchema, body: T): T => {
+    try {
+        return schema.parse(body)
+    } catch (error) {
+        throw new AppError(400, 'Invalid Schema', error.errors)
+    }
 }

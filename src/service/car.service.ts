@@ -1,16 +1,26 @@
-import { dbFirestore } from "../config/firebaseDB"
-import { CarRef } from "../config/firebaseDB"
-import { Car } from "../model/cars.model"
-import { AppError } from "../util/appError"
+import { ICarBrandRequestBody, ICarRequestBody } from '../model/car/cars.model'
+import { AppError } from '../util/appError'
 
-export const createCarRecord = async (body: Car): Promise<string> => {
-  try {
-    await CarRef.doc().set({
-      ...body,
-      created_at: dbFirestore.FieldValue.serverTimestamp() 
-    })
-    return 'Created Car Record SuccessFully'
-  } catch (error) {
-    throw new AppError(500, 'Server error')
-  }
+import * as carDB from '../dataAccess/car.db'
+
+export const createCarRecord = async (
+    body: ICarRequestBody
+): Promise<string> => {
+    try {
+        await carDB.createCar(body)
+        return 'Created Car Record SuccessFully'
+    } catch (error) {
+        throw new AppError(500, 'Server error')
+    }
+}
+
+export const createCarBrandRecord = async (
+    body: ICarBrandRequestBody
+): Promise<string> => {
+    try {
+        await carDB.createCarBrand(body)
+        return 'Created Car Brand Record SuccessFully'
+    } catch (error) {
+        throw new AppError(500, 'Server error')
+    }
 }
