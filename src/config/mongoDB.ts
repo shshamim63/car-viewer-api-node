@@ -4,8 +4,6 @@ import { mongoConfig } from '.'
 
 const connectionURL = mongoConfig.mongoURL
 
-console.log('Mongo URL', connectionURL)
-
 connect(connectionURL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
