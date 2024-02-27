@@ -5,7 +5,7 @@ services:
         build:
             context: .
             dockerfile: Dockerfile.dev
-        restart: 'on-failure'
+        restart: on-failure
         ports:
             - 3000:3000
         volumes:

@@ -1,21 +1,25 @@
 name: Run Tests
+
 on:
     pull_request:
-        types:
-            - opened
-        branches: [master, staging]
-    workflow_dispatch:
+        branches:
+            - main
+            - staging
+    push:
+        branches:
+            - main
+permissions: read-all
 jobs:
     test:
+        name: Test
         runs-on: ubuntu-latest
+
         steps:
-            - name: Get code
-              uses: actions/checkout@v3
-            - name: Install NodeJS
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-            - name: Install Dependencies
-              run: npm ci
-            - name: Run tests
-              run: npm run test
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - name: Build Docker image
+              run: docker build -t my-node-app-test -f Dockerfile.test .
+
+            - name: Run Docker container for tests
+              run: docker run my-node-app-test

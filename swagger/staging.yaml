@@ -1,3 +1,5 @@
+security:
+    - bearerAuth: []
 openapi: 3.0.3
 info:
     title: Sample API
@@ -10,7 +12,7 @@ paths:
     /:
         get:
             tags:
-                - 'Default'
+                - Default
             summary: The root path of the service
             description: This route provides the indication that the server is running appropriately
             responses:
@@ -23,7 +25,7 @@ paths:
     /user/registration:
         post:
             tags:
-                - 'Auth'
+                - Auth
             summary: Registration path for users
             description: This route allows to create user in to system
             requestBody:
@@ -50,7 +52,7 @@ paths:
     /user/login:
         post:
             tags:
-                - 'Auth'
+                - Auth
             summary: Login Route
             description: Allows user to authenticate and access service with access token
             requestBody:
@@ -83,7 +85,7 @@ paths:
     /activate/user:
         post:
             tags:
-                - 'Auth'
+                - Auth
             summary: User Activation Route
             description: Allows user to activate the account through email
             parameters:
@@ -219,6 +221,7 @@ components:
                     example: Invalid Schema
                 description:
                     type: array
+                    maxItems: 5
                     items:
                         $ref: '#/components/schemas/InvalidSchema'
         InvalidSchema:
@@ -235,6 +238,7 @@ components:
                     example: Invalid email
                 path:
                     type: array
+                    maxItems: 10
                     items:
                         type: string
                         example: email
