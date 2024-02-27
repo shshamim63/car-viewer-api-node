@@ -26,14 +26,6 @@ services:
             - data:/data/db
         networks:
             - node-server
-    redis:
-        image: redis
-        networks:
-            - node-server
-        ports:
-            - 6379:6379
-        volumes:
-            - myredis:/usr/local/etc/redis
 networks:
     node-server:
 volumes:
