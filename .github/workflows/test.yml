@@ -28,16 +28,12 @@ jobs:
             SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
         steps:
             - name: Checkout Repository
-              uses: actions/checkout@v2
+              uses: actions/checkout@v4
 
             - name: Set up Node.js
-              uses: actions/setup-node@v2
+              uses: actions/setup-node@v4
               with:
-                  node-version: '14'
-
-            - name: Display Environment Variables
-              run: |
-                  echo "MongoDB URL: $MONGO_URI"
+                  node-version: '20.x'
 
             - name: Install Dependencies
               run: npm install
