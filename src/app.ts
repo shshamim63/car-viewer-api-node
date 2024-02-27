@@ -13,6 +13,10 @@ import { invalidRouteMiddleware } from './middlewares/invalidRoute.middleware'
 import { corsMiddleware } from './middlewares/cors.middleware'
 
 const app = express()
+const swaggerDocument = YAML.load('./swagger/staging.yaml')
+const options = {
+    explorer: true,
+}
 
 app.use(
     bodyParser.urlencoded({
@@ -21,15 +25,12 @@ app.use(
 )
 app.use(bodyParser.json())
 
-const swaggerDocument = YAML.load('./swagger/staging.yaml')
 
-const options = {
-    explorer: true,
-}
 
 app.use(corsMiddleware)
 
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options))
+
 app.use(defaultRoutes.router)
 app.use(authRoutes.router)
 app.use(carRouters.router)
