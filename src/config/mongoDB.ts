@@ -1,12 +1,20 @@
-import { ConnectOptions, connect } from 'mongoose'
+import mongoose, { ConnectOptions } from 'mongoose'
 
 import { mongoConfig } from '.'
 
 const connectionURL = mongoConfig.mongoURL
 
-connect(connectionURL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-} as ConnectOptions)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(() => console.log('Failed to connect MongoDB'))
+const connectDB = async () => {
+    try {
+        const conn = await mongoose.connect(connectionURL, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        } as ConnectOptions)
+        console.log(`MongoDB Connected: ${conn.connection.host}`)
+    } catch (err) {
+        console.error(`Error: ${err.message}`)
+        process.exit(1)
+    }
+}
+
+export { connectDB, mongoose }

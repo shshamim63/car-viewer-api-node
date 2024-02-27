@@ -3,7 +3,6 @@ import bodyParser from 'body-parser'
 import swaggerUi from 'swagger-ui-express'
 import YAML from 'yamljs'
 
-require('./config/mongoDB')
 
 import * as defaultRoutes from './routes/default'
 import * as carRouters from './routes/cars'
@@ -11,7 +10,9 @@ import * as authRoutes from './routes/auth'
 import { errorHandlerMiddleware } from './middlewares/errorHandler.middleware'
 import { invalidRouteMiddleware } from './middlewares/invalidRoute.middleware'
 import { corsMiddleware } from './middlewares/cors.middleware'
+import { connectDB } from './config/mongoDB'
 
+connectDB()
 const app = express()
 const swaggerDocument = YAML.load('./swagger/staging.yaml')
 const options = {

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import { mongoose } from '../config/mongoDB'
 
 import { AppError } from '../util/appError'
 import { IAuthenticatedUser, IUser } from '../model/user/user.model'
