@@ -25,8 +25,6 @@ app.use(
 )
 app.use(bodyParser.json())
 
-
-
 app.use(corsMiddleware)
 
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options))
