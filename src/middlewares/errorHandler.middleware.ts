@@ -7,13 +7,10 @@ export const errorHandlerMiddleware = (
     next: NextFunction
 ) => {
     const errorResponse = {
-        message: 'Server Error',
+        message: err.message ? err.message : 'Server Error',
+        ...(err.description && { description: err.description }),
     }
-    let statusCode = 500
-
-    if (err.message) errorResponse['message'] = err.message
-    if (err.description) errorResponse['description'] = err.description
-    if (err.statusCode) statusCode = err.statusCode
+    const statusCode = err.statusCode ? err.statusCode : 500
 
     res.status(statusCode).send(errorResponse)
 }
