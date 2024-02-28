@@ -11,6 +11,10 @@ import {
     ZodRoleEnum,
 } from './user.schema'
 
+export interface Query {
+    [key: string]: string | number
+}
+
 export type IActivateUserQuery = z.infer<typeof ActivateUserQuerySchema>
 export type IUser = z.infer<typeof UserSchema>
 export type IRegistrationBody = z.infer<typeof RegistrationBodySchema>

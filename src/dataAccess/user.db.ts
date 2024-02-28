@@ -1,7 +1,7 @@
 import { mongoose } from '../config/mongoDB'
 
 import { AppError } from '../util/appError'
-import { IAuthenticatedUser, IUser } from '../model/user/user.model'
+import { IAuthenticatedUser, IUser, Query } from '../model/user/user.model'
 import { RefreshToken, User } from '../model/user/user.mongo.schema'
 import { convertToUserResponse } from '../presenter/auth.serialize'
 import { authConfig } from '../config'
@@ -12,7 +12,7 @@ export const createUser = async (data: IUser): Promise<IUser> => {
     return savedUser
 }
 
-export const findOneUser = async (query: any): Promise<IUser | null> => {
+export const findOneUser = async (query: Query): Promise<IUser | null> => {
     const user = await User.findOne(query)
     if (!user || !Object.keys(user).length) {
         return null
