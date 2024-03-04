@@ -12,8 +12,16 @@ export const authConfig = {
     refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
 }
 
+const {
+    MONGODB_USER,
+    MONGODB_PASSWORD,
+    MONGODB_HOST,
+    MONGODB_PORT,
+    MONGODB_DATABASE,
+} = process.env
+
 export const mongoConfig = {
-    mongoURL: process.env.MONGO_URI,
+    mongoURL: `mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=admin`,
 }
 
 export const sendGridConfig = {
