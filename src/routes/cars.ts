@@ -3,7 +3,7 @@ import * as carController from '../controller/car.controller'
 import {
     authenticate,
     authorized,
-} from '../middlewares/authenticate.middleware'
+} from '../middlewares/permission.middleware'
 
 const router = Router()
 

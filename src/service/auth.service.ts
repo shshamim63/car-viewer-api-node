@@ -14,7 +14,6 @@ import { SALTROUNDS } from '../const'
 import { authConfig } from '../config'
 
 import { convertToUserResponse } from '../presenter/auth.serialize'
-import * as mailer from '../util/mailer'
 
 import { ZodActiveStatusEnum } from '../model/user/user.schema'
 import { generateToken, verifyToken } from '../util/jwt'
@@ -99,11 +98,6 @@ export const registerUser = async (
         const activationToken = generateToken(
             userInfo,
             authConfig.accessTokenSecret
-        )
-        mailer.sendConfirmationEmail(
-            userInfo.username,
-            userInfo.email,
-            activationToken
         )
         return 'Registration successful, please check email to verify your account'
     } catch (error) {

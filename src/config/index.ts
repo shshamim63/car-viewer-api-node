@@ -23,8 +23,3 @@ const {
 export const mongoConfig = {
     mongoURL: `mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=admin`,
 }
-
-export const sendGridConfig = {
-    sendgridApiKey: process.env.SENDGRID_API_KEY,
-    sendgridSenderEmail: process.env.SENDGRID_SENDER_EMAIL,
-}
