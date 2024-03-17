@@ -9,7 +9,7 @@ export class AppError extends Error {
     constructor(
         statusCode: number,
         message: string,
-        description: ErrorProperty
+        description?: string | ErrorProperty | null
     ) {
         super(message)
 
