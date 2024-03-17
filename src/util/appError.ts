@@ -1,8 +1,16 @@
+interface ErrorProperty {
+    [key: string]: string
+}
+
 export class AppError extends Error {
     statusCode: number
-    description: any
+    description: string | ErrorProperty | null
 
-    constructor(statusCode: number, message: string, description: any = null) {
+    constructor(
+        statusCode: number,
+        message: string,
+        description: ErrorProperty
+    ) {
         super(message)
 
         Object.setPrototypeOf(this, new.target.prototype)
