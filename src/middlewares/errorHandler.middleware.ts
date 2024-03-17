@@ -1,10 +1,14 @@
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response } from 'express'
+
+interface CustomError extends Error {
+    statusCode: number
+    description?: string
+}
 
 export const errorHandlerMiddleware = (
-    err: any,
+    err: CustomError,
     req: Request,
-    res: Response,
-    next: NextFunction
+    res: Response
 ) => {
     const errorResponse = {
         message: err.message ? err.message : 'Server Error',
