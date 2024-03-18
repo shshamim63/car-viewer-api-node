@@ -50,6 +50,7 @@
         "jsonwebtoken": "^9.0.0",
         "mongoose": "^7.0.3",
         "nodemailer": "^6.9.11",
+        "nodemailer-express-handlebars": "^6.1.2",
         "swagger-ui-express": "^4.6.2",
         "winston": "^3.8.2",
         "yamljs": "^0.3.0",

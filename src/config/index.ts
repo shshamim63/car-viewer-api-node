@@ -12,6 +12,11 @@ export const authConfig = {
     refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
 }
 
+export const mailerConfig = {
+    user: process.env.GAMIL_USER,
+    pass: process.env.GMAIL_PASSWORD,
+}
+
 const {
     MONGODB_USER,
     MONGODB_PASSWORD,
