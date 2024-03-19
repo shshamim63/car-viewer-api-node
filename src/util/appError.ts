@@ -1,15 +1,12 @@
-interface ErrorProperty {
-    [key: string]: string
-}
-
+import { ErrorProperty } from '../model/utils/error'
 export class AppError extends Error {
     statusCode: number
-    description: string | ErrorProperty | null
+    description: string | ErrorProperty[] | null
 
     constructor(
         statusCode: number,
         message: string,
-        description?: string | ErrorProperty | null
+        description?: string | ErrorProperty[] | null
     ) {
         super(message)
 

@@ -51,8 +51,8 @@ export const registerUser = async (
     res: Response,
     next: NextFunction
 ) => {
+    const requestBody: IRegistrationBody = req.body
     try {
-        const requestBody: IRegistrationBody = req.body
         const body = schemaValidation(RegistrationBodySchema, requestBody)
         if (body) {
             const response = await authService.registerUser(body)

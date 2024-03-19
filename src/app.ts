@@ -35,8 +35,8 @@ app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options))
 app.use(defaultRoutes.router)
 app.use(authRoutes.router)
 app.use(carRouters.router)
-app.use(invalidRouteMiddleware)
 
+app.use(invalidRouteMiddleware)
 app.use(errorHandlerMiddleware)
 
 export { app }

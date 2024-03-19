@@ -21,11 +21,14 @@ describe('Auth/Registration', () => {
     const requestBody = {} as IRegistrationBody
     describe('Request Body validation', () => {
         test('Should throw error when request body is invalid', async () => {
-            const response = await request(app)
+            const data = await request(app)
                 .post('/auth/registration')
                 .send(requestBody)
-            expect(response.error.status).toEqual(400)
-            expect(response._body.message).toEqual('Invalid Schema')
+
+            const responseText = JSON.parse(data.text)
+            expect(data.status).toEqual(400)
+            expect(responseText.message).toEqual('Invalid Schema')
+            expect(responseText.description.length).toEqual(4)
         })
     })
 })
