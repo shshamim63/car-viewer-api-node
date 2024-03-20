@@ -18,7 +18,7 @@ import { AppError } from '../util/appError'
 import { SALTROUNDS } from '../const'
 
 import { convertToUserResponse } from '../presenter/auth.serialize'
-import { sendMailToUser } from '../util/mailer'
+import * as MailHelper from '../util/mailer'
 
 export const activateUserAccount = async (query: IActivateUserQuery) => {
     const decodedUser: IUser = verifyToken(
@@ -105,7 +105,7 @@ export const registerUser = async (
             url: `${appConfig.baseURL}/auth/user/activate?token=${activationToken}`,
             name: data.username,
         }
-        sendMailToUser({
+        MailHelper.sendMailToUser({
             email: data.email,
             context: context,
             template: 'verification-mail',
