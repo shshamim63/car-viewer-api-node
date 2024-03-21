@@ -1,35 +1,57 @@
-import sgMail from '@sendgrid/mail'
+import nodemailer from 'nodemailer'
+import hbs from 'nodemailer-express-handlebars'
+import path from 'path'
 
-import { appConfig, sendGridConfig } from '../config'
+import { mailerConfig } from '../config'
+import { MailContext, MailConfirmation } from '../model/utils/mailer'
 
-sgMail.setApiKey(sendGridConfig.sendgridApiKey)
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    auth: {
+        user: mailerConfig.user,
+        pass: mailerConfig.pass,
+    },
+})
 
-export const sendConfirmationEmail = (
-    name: string,
-    email: string,
-    activationToken: string
-) => {
-    const activationUrl = `${appConfig.baseURL}/activate/user?token=${activationToken}`
+const viewsPath = path.join(__dirname, '..', 'views')
 
-    if (appConfig.env === 'development')
-        console.log('Activation_url', activationUrl)
-
-    const msg = {
-        to: email,
-        from: sendGridConfig.sendgridSenderEmail,
-        templateId: 'd-1b4b3d65331540e2b06dd2dec960f1e2',
-        dynamic_template_data: {
-            customer: name,
-            activation_url: activationUrl,
+transporter.use(
+    'compile',
+    hbs({
+        viewEngine: {
+            extName: '.handlebars',
+            partialsDir: path.join(viewsPath, 'partials'),
+            defaultLayout: false,
         },
-    }
+        viewPath: viewsPath,
+    })
+)
 
-    sgMail
-        .send(msg)
-        .then(() => {
-            console.log('Email sent')
+export const sendMailToUser = ({
+    email,
+    context,
+    template = null,
+}: {
+    email: string
+    context: MailContext
+    template?: string
+}): Promise<MailConfirmation> => {
+    return new Promise((resolve, reject) => {
+        const mailOption = {
+            from: mailerConfig.user,
+            to: email,
+            subject: 'Activate your account',
+            ...(template && { template: template }),
+            context,
+        }
+
+        transporter.sendMail(mailOption, (err, info) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(info)
+            }
         })
-        .catch((error) => {
-            console.error(error)
-        })
+    })
 }

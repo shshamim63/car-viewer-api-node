@@ -1,7 +1,14 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
+
+import { ErrorProperty } from '../model/utils/error'
+
+interface CustomError extends Error {
+    statusCode: number
+    description?: string | ErrorProperty
+}
 
 export const errorHandlerMiddleware = (
-    err: any,
+    err: CustomError,
     req: Request,
     res: Response,
     next: NextFunction

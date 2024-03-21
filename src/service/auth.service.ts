@@ -2,6 +2,9 @@ import bcrypt from 'bcrypt'
 
 import * as userDB from '../dataAccess/user.db'
 
+import { appConfig, authConfig } from '../config'
+import { generateToken, verifyToken } from '../util/jwt'
+
 import {
     IActivateUserQuery,
     IAuthenticatedUser,
@@ -9,15 +12,13 @@ import {
     IRegistrationBody,
     IUser,
 } from '../model/user/user.model'
+import { ZodActiveStatusEnum } from '../model/user/user.schema'
+
 import { AppError } from '../util/appError'
 import { SALTROUNDS } from '../const'
-import { authConfig } from '../config'
 
 import { convertToUserResponse } from '../presenter/auth.serialize'
-import * as mailer from '../util/mailer'
-
-import { ZodActiveStatusEnum } from '../model/user/user.schema'
-import { generateToken, verifyToken } from '../util/jwt'
+import * as MailHelper from '../util/mailer'
 
 export const activateUserAccount = async (query: IActivateUserQuery) => {
     const decodedUser: IUser = verifyToken(
@@ -100,11 +101,15 @@ export const registerUser = async (
             userInfo,
             authConfig.accessTokenSecret
         )
-        mailer.sendConfirmationEmail(
-            userInfo.username,
-            userInfo.email,
-            activationToken
-        )
+        const context = {
+            url: `${appConfig.baseURL}/auth/user/activate?token=${activationToken}`,
+            name: data.username,
+        }
+        MailHelper.sendMailToUser({
+            email: data.email,
+            context: context,
+            template: 'verification-mail',
+        })
         return 'Registration successful, please check email to verify your account'
     } catch (error) {
         if (error.code === 11000) {

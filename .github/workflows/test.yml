@@ -10,7 +10,7 @@ on:
             - main
 permissions: read-all
 jobs:
-    build:
+    test:
         runs-on: ubuntu-latest
 
         services:
@@ -21,11 +21,13 @@ jobs:
                 options: --name mongodb
 
         env:
+            NODE_ENV: test
             MONGO_URI: mongodb://localhost:27017/logistic
             ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
             REFRESH_TOKEN_SECRET: ${{ secrets. REFRESH_TOKEN_SECRET }}
-            SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-            SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
+            GAMIL_USER: ${{ secrets.GAMIL_USER }}
+            GMAIL_PASSWORD: ${{secrets.GMAIL_PASSWORD }}
+
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v4

@@ -6,6 +6,7 @@ const connectionURL = mongoConfig.mongoURL
 
 const connectDB = async () => {
     try {
+        console.log(connectionURL)
         const conn = await mongoose.connect(connectionURL, {
             useNewUrlParser: true,
             useUnifiedTopology: true,

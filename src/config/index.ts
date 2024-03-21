@@ -12,11 +12,22 @@ export const authConfig = {
     refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
 }
 
-export const mongoConfig = {
-    mongoURL: process.env.MONGO_URI,
+export const mailerConfig = {
+    user: process.env.GAMIL_USER,
+    pass: process.env.GMAIL_PASSWORD,
 }
 
-export const sendGridConfig = {
-    sendgridApiKey: process.env.SENDGRID_API_KEY,
-    sendgridSenderEmail: process.env.SENDGRID_SENDER_EMAIL,
+const {
+    MONGODB_USER,
+    MONGODB_PASSWORD,
+    MONGODB_HOST,
+    MONGODB_PORT,
+    MONGODB_DATABASE,
+} = process.env
+
+export const mongoConfig = {
+    mongoURL:
+        appConfig.env === 'test'
+            ? process.env.MONGO_URI
+            : `mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=admin`,
 }

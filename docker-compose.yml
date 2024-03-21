@@ -2,25 +2,31 @@ version: '3.9'
 
 services:
     api:
+        container_name: api
         build:
             context: .
             dockerfile: Dockerfile.dev
         restart: on-failure
         ports:
-            - 3000:3000
+            - ${PORT}:${NODE_DOCKER_PORT}
         volumes:
             - /app/node_modules
             - .:/app
         networks:
             - node-server
         depends_on:
-            - mongo
+            - mongodb
         env_file:
             - .env
-    mongo:
+    mongodb:
         image: mongo
+        container_name: mongodb
+        restart: unless-stopped
         ports:
-            - 27017:27017
+            - ${MONGODB_PORT}:${MONGODB_DOCKER_PORT}
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USER}
+            - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
         volumes:
             - data:/data/db
         networks:
