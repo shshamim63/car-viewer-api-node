@@ -231,7 +231,7 @@ describe('Auth/Registration', () => {
             test('Should throw error when creating duplicate user', async () => {
                 const mailSpy = jest.spyOn(MailHelper, 'sendMailToUser')
                 const error = new Error('Duplicate data') as any
-                error.code = 1100
+                error.code = 11000
 
                 const createUserSpy = jest
                     .spyOn(userDB, 'createUser')
@@ -242,7 +242,7 @@ describe('Auth/Registration', () => {
                     .send(requestBody)
                 expect(mailSpy).toBeCalledTimes(0)
                 expect(createUserSpy).toHaveBeenCalled()
-                console.log(retryResponse)
+                expect(retryResponse.status).toEqual(409)
             })
         })
     })
