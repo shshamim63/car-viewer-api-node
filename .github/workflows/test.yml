@@ -10,7 +10,7 @@ on:
             - main
 permissions: read-all
 jobs:
-    build:
+    test:
         runs-on: ubuntu-latest
 
         services:
@@ -21,7 +21,7 @@ jobs:
                 options: --name mongodb
 
         env:
-            MONGO_URI: mongodb://localhost:27017/logistic
+            MONGO_URI: mongodb://mongodb:27017/logistic
             ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
             REFRESH_TOKEN_SECRET: ${{ secrets. REFRESH_TOKEN_SECRET }}
             GAMIL_USER: ${{ secrets.GAMIL_USER }}
