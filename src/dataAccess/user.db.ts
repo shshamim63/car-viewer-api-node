@@ -8,8 +8,22 @@ import { authConfig } from '../config'
 import { generateToken } from '../util/jwt'
 
 export const createUser = async (data: IUser): Promise<IUser> => {
-    const savedUser = await User.create(data)
-    return savedUser
+    try {
+        const savedUser = await User.create(data)
+        return savedUser
+    } catch (error) {
+        if (error.code === 11000) {
+            throw new AppError(
+                409,
+                `User exists with the following ${JSON.stringify(
+                    error.keyValue
+                )}`,
+                error.keyValue
+            )
+        } else {
+            throw new AppError(500, 'Server error')
+        }
+    }
 }
 
 export const findOneUser = async (query: Query): Promise<IUser | null> => {

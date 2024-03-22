@@ -24,7 +24,7 @@ export const activateUserAccount = async (
     try {
         const requestQuery: IActivateUserQuery = req.query
         const data = schemaValidation(ActivateUserQuerySchema, requestQuery)
-        const response = await authService.activateUserAccount(data)
+        const response = await authService.activateUserAccount(data, next)
         if (response) res.status(200).send(formatResponse(response))
     } catch (error) {
         next(error)
@@ -55,7 +55,7 @@ export const registerUser = async (
     try {
         const body = schemaValidation(RegistrationBodySchema, requestBody)
         if (body) {
-            const response = await authService.registerUser(body)
+            const response = await authService.registerUser(body, next)
             if (response) res.status(201).send(formatResponse(response))
         }
     } catch (error) {

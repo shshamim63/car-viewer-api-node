@@ -19,35 +19,31 @@ import { SALTROUNDS } from '../const'
 
 import { convertToUserResponse } from '../presenter/auth.serialize'
 import * as MailHelper from '../util/mailer'
+import { NextFunction } from 'express'
 
-export const activateUserAccount = async (query: IActivateUserQuery) => {
-    const decodedUser: IUser = verifyToken(
-        query.token,
-        authConfig.accessTokenSecret
-    )
-
-    const currentUser = await userDB.findOneUser({ _id: decodedUser.id })
-
-    if (!currentUser)
-        throw new AppError(
-            404,
-            'Invalid user credential',
-            `User does not exist with email: ${decodedUser.email}`
+export const activateUserAccount = async (
+    query: IActivateUserQuery,
+    next: NextFunction
+) => {
+    try {
+        const decodedUser: IUser = verifyToken(
+            query.token,
+            authConfig.accessTokenSecret
         )
+        console.log(decodedUser)
+        return decodedUser
+    } catch (error) {
+        next(error)
+    }
 
-    const currentUserInfo = convertToUserResponse(currentUser)
+    // const updatedUser = await userDB.findAndUpdateUserById(currentUserInfo.id, {
+    //     status: ZodActiveStatusEnum.Enum.Active,
+    // })
 
-    if (currentUserInfo.status != 'Pending')
-        throw new AppError(400, 'User is already active')
-
-    const updatedUser = await userDB.findAndUpdateUserById(currentUserInfo.id, {
-        status: ZodActiveStatusEnum.Enum.Active,
-    })
-
-    return await userDB.generateAuthenticatedUserInfo({
-        ...updatedUser,
-        status: ZodActiveStatusEnum.Enum.Active,
-    })
+    // return await userDB.generateAuthenticatedUserInfo({
+    //     ...updatedUser,
+    //     status: ZodActiveStatusEnum.Enum.Active,
+    // })
 }
 
 export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
@@ -85,7 +81,8 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
 }
 
 export const registerUser = async (
-    body: IRegistrationBody
+    body: IRegistrationBody,
+    next: NextFunction
 ): Promise<string> => {
     const data: IUser = {
         email: body.email,
@@ -112,17 +109,7 @@ export const registerUser = async (
         })
         return 'Registration successful, please check email to verify your account'
     } catch (error) {
-        if (error.code === 11000) {
-            throw new AppError(
-                409,
-                `User exists with the following ${JSON.stringify(
-                    error.keyValue
-                )}`,
-                error.keyValue
-            )
-        } else {
-            throw new AppError(500, 'Server error')
-        }
+        next(error)
     }
 }
 
