@@ -2,7 +2,7 @@ import { IAuthenticatedUser, IUser } from '../model/user/user.model'
 
 export const convertToUserResponse = (data: IUser): IAuthenticatedUser => {
     const userInfo = {
-        avatar: data.avatar,
+        avatar: data.avatar ?? '',
         createdAt: data.createdAt,
         email: data.email,
         id: data.id,

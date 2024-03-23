@@ -233,6 +233,7 @@ describe('Auth/Registration', () => {
                     .post('/auth/registration')
                     .send(requestBody)
                 const responseText = JSON.parse(data.text)
+
                 expect(mailSpy).toHaveBeenCalled()
                 expect(responseText.data).toEqual(
                     'Registration successful, please check email to verify your account'
