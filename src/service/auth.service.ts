@@ -40,37 +40,35 @@ export const activateUserAccount = async (
     }
 }
 
-export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
-    const query = {
-        email: body.email,
-    }
-
-    let user: IUser = null
-    let authenticate = false
-
+export const login = async (
+    body: ILoginBody,
+    next: NextFunction
+): Promise<IAuthenticatedUser> => {
     try {
-        user = await userDB.findOneUser(query)
-        if (user)
-            authenticate = await bcrypt.compare(
-                body.password,
-                user.passwordHash
+        const query = {
+            email: body.email,
+        }
+
+        const user = await userDB.findOneUser(query)
+        if (!user)
+            throw new AppError(
+                404,
+                'Invalid user credential',
+                `User does not exist with email: ${body.email}`
             )
-    } catch (error) {
-        throw new AppError(500, 'Server error')
-    }
+        const authenticate =
+            user && (await bcrypt.compare(body.password, user.passwordHash))
 
-    if (!user)
-        throw new AppError(
-            404,
-            'Invalid user credential',
-            `User does not exist with email: ${body.email}`
-        )
-    if (!authenticate)
-        throw new AppError(401, 'Invalid user credential', `Invalid password`)
-
-    if (user && authenticate) {
+        if (!authenticate)
+            throw new AppError(
+                401,
+                'Invalid user credential',
+                `Invalid password`
+            )
         const userInfo = convertToUserResponse(user)
         return await userDB.generateAuthenticatedUserInfo(userInfo)
+    } catch (error) {
+        next(error)
     }
 }
 

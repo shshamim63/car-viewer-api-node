@@ -25,11 +25,13 @@ export const createUser = async (data: IUser): Promise<IUser> => {
 }
 
 export const findOneUser = async (query: Query): Promise<IUser | null> => {
-    const user = await User.findOne(query)
-    if (!user || !Object.keys(user).length) {
-        return null
+    try {
+        const user = await User.findOne(query)
+        if (!user) return null
+        return user
+    } catch (error) {
+        throw new AppError(500, 'Server error')
     }
-    return user
 }
 
 export const findAndUpdateUser = async (filter: Query, body: IUser) => {

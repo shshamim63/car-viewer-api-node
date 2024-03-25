@@ -39,7 +39,7 @@ export const login = async (
     try {
         const requestBody: ILoginBody = req.body
         const body = schemaValidation(LoginBodySchema, requestBody)
-        const response = await authService.login(body)
+        const response = await authService.login(body, next)
         if (response) res.status(200).send(formatResponse(response))
     } catch (error) {
         next(error)
