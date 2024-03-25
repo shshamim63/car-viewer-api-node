@@ -6,7 +6,6 @@ import { mongoConfig } from '../../../src/config'
 import { app } from '../../../src/app'
 import * as authService from '../../../src/service/auth.service'
 import * as userDB from '../../../src/dataAccess/user.db'
-import { AppError } from '../../../src/util/appError'
 import { IAuthenticatedUser } from '../../../src/model/user/user.model'
 
 describe('Auth/Login', () => {
