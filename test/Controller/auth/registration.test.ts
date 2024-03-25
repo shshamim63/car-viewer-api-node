@@ -8,7 +8,10 @@ import * as userDB from '../../../src/dataAccess/user.db'
 import * as MailHelper from '../../../src/util/mailer'
 
 import { IRegistrationBody } from '../../../src/model/user/user.model'
+import { User } from '../../../src/model/user/user.mongo.schema'
+
 import { mongoConfig } from '../../../src/config'
+import { CustomError } from './helper/error'
 
 describe('Auth/Registration', () => {
     beforeAll(async () => {
@@ -16,10 +19,17 @@ describe('Auth/Registration', () => {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         } as ConnectOptions)
+        await mongoose.connection.dropDatabase()
     })
 
     afterAll(async () => {
         await mongoose.connection.close()
+    })
+
+    afterEach(() => {
+        jest.clearAllMocks()
+        jest.resetAllMocks()
+        jest.restoreAllMocks()
     })
 
     describe('Request Body validation', () => {
@@ -184,7 +194,7 @@ describe('Auth/Registration', () => {
                     'String must contain at least 8 character(s)'
                 )
             })
-            test('Should not throw error when confirmPassword is valid', async () => {
+            test('Should throw error when confirmPassword does not match password', async () => {
                 requestBody.confirmPassword = 'lhkdmdkssdgd'
 
                 const data = await request(app)
@@ -204,14 +214,14 @@ describe('Auth/Registration', () => {
                     .spyOn(userDB, 'createUser')
                     .mockResolvedValue(requestBody)
                 const mailSpy = jest.spyOn(MailHelper, 'sendMailToUser')
-                requestBody.confirmPassword = 'abcdefghijkl'
+                requestBody.confirmPassword = requestBody.password
                 const data = await request(app)
                     .post('/auth/registration')
                     .send(requestBody)
                 const responseText = JSON.parse(data.text)
                 expect(createUserSpy).toHaveBeenCalled()
                 expect(mailSpy).toHaveBeenCalled()
-                expect(responseText.message).toEqual(
+                expect(responseText.data).toEqual(
                     'Registration successful, please check email to verify your account'
                 )
             })
@@ -223,25 +233,21 @@ describe('Auth/Registration', () => {
                     .post('/auth/registration')
                     .send(requestBody)
                 const responseText = JSON.parse(data.text)
+
                 expect(mailSpy).toHaveBeenCalled()
-                expect(responseText.message).toEqual(
+                expect(responseText.data).toEqual(
                     'Registration successful, please check email to verify your account'
                 )
             })
             test('Should throw error when creating duplicate user', async () => {
                 const mailSpy = jest.spyOn(MailHelper, 'sendMailToUser')
-                const error = new Error('Duplicate data') as any
-                error.code = 11000
-
-                const createUserSpy = jest
-                    .spyOn(userDB, 'createUser')
-                    .mockRejectedValue(error)
-
+                jest.spyOn(User, 'create').mockImplementationOnce(() => {
+                    throw new CustomError('Duplicate key error', 11000)
+                })
                 const retryResponse = await request(app)
                     .post('/auth/registration')
                     .send(requestBody)
                 expect(mailSpy).toBeCalledTimes(0)
-                expect(createUserSpy).toHaveBeenCalled()
                 expect(retryResponse.status).toEqual(409)
             })
         })

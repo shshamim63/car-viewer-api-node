@@ -1,8 +1,10 @@
 import bcrypt from 'bcrypt'
+import { NextFunction } from 'express'
 
 import * as userDB from '../dataAccess/user.db'
 
 import { appConfig, authConfig } from '../config'
+import { SALTROUNDS } from '../const'
 import { generateToken, verifyToken } from '../util/jwt'
 
 import {
@@ -15,39 +17,27 @@ import {
 import { ZodActiveStatusEnum } from '../model/user/user.schema'
 
 import { AppError } from '../util/appError'
-import { SALTROUNDS } from '../const'
 
 import { convertToUserResponse } from '../presenter/auth.serialize'
 import * as MailHelper from '../util/mailer'
 
-export const activateUserAccount = async (query: IActivateUserQuery) => {
-    const decodedUser: IUser = verifyToken(
-        query.token,
-        authConfig.accessTokenSecret
-    )
-
-    const currentUser = await userDB.findOneUser({ _id: decodedUser.id })
-
-    if (!currentUser)
-        throw new AppError(
-            404,
-            'Invalid user credential',
-            `User does not exist with email: ${decodedUser.email}`
+export const activateUserAccount = async (
+    query: IActivateUserQuery,
+    next: NextFunction
+) => {
+    try {
+        const decodedUser: IUser = verifyToken(
+            query.token,
+            authConfig.accessTokenSecret
         )
-
-    const currentUserInfo = convertToUserResponse(currentUser)
-
-    if (currentUserInfo.status != 'Pending')
-        throw new AppError(400, 'User is already active')
-
-    const updatedUser = await userDB.findAndUpdateUserById(currentUserInfo.id, {
-        status: ZodActiveStatusEnum.Enum.Active,
-    })
-
-    return await userDB.generateAuthenticatedUserInfo({
-        ...updatedUser,
-        status: ZodActiveStatusEnum.Enum.Active,
-    })
+        const updatedUser = await userDB.findAndUpdateUser(
+            { _id: decodedUser.id, status: ZodActiveStatusEnum.Enum.Pending },
+            { status: ZodActiveStatusEnum.Enum.Active }
+        )
+        return await userDB.generateAuthenticatedUserInfo(updatedUser)
+    } catch (error) {
+        next(error)
+    }
 }
 
 export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
@@ -85,44 +75,40 @@ export const login = async (body: ILoginBody): Promise<IAuthenticatedUser> => {
 }
 
 export const registerUser = async (
-    body: IRegistrationBody
+    body: IRegistrationBody,
+    next: NextFunction
 ): Promise<string> => {
-    const data: IUser = {
-        email: body.email,
-        passwordHash: await bcrypt.hashSync(body.password, SALTROUNDS),
-        username: body.username,
-        avatar: body.avatar ?? '',
-    }
-
     try {
+        const data: IUser = {
+            email: body.email,
+            passwordHash: await bcrypt.hashSync(body.password, SALTROUNDS),
+            username: body.username,
+            avatar: body.avatar ?? '',
+        }
+
         const user = await userDB.createUser(data)
+
         const userInfo = convertToUserResponse(user)
+
         const activationToken = generateToken(
             userInfo,
             authConfig.accessTokenSecret
         )
+
         const context = {
             url: `${appConfig.baseURL}/auth/user/activate?token=${activationToken}`,
             name: data.username,
         }
+
         MailHelper.sendMailToUser({
             email: data.email,
             context: context,
             template: 'verification-mail',
         })
+
         return 'Registration successful, please check email to verify your account'
     } catch (error) {
-        if (error.code === 11000) {
-            throw new AppError(
-                409,
-                `User exists with the following ${JSON.stringify(
-                    error.keyValue
-                )}`,
-                error.keyValue
-            )
-        } else {
-            throw new AppError(500, 'Server error')
-        }
+        next(error)
     }
 }
 

@@ -1,5 +1,3 @@
-import { mongoose } from '../config/mongoDB'
-
 import { AppError } from '../util/appError'
 import { IAuthenticatedUser, IUser, Query } from '../model/user/user.model'
 import { RefreshToken, User } from '../model/user/user.mongo.schema'
@@ -8,8 +6,22 @@ import { authConfig } from '../config'
 import { generateToken } from '../util/jwt'
 
 export const createUser = async (data: IUser): Promise<IUser> => {
-    const savedUser = await User.create(data)
-    return savedUser
+    try {
+        const savedUser = await User.create(data)
+        return savedUser
+    } catch (error) {
+        if (error.code === 11000) {
+            throw new AppError(
+                409,
+                `User exists with the following ${JSON.stringify(
+                    error.keyValue
+                )}`,
+                error.keyValue
+            )
+        } else {
+            throw new AppError(500, 'Server error')
+        }
+    }
 }
 
 export const findOneUser = async (query: Query): Promise<IUser | null> => {
@@ -20,12 +32,11 @@ export const findOneUser = async (query: Query): Promise<IUser | null> => {
     return user
 }
 
-export const findAndUpdateUserById = async (id: string, body: IUser) => {
+export const findAndUpdateUser = async (filter: Query, body: IUser) => {
     try {
-        const response = await User.findOneAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            body
-        )
+        const response = await User.findOneAndUpdate(filter, body, {
+            new: true,
+        })
         return convertToUserResponse(response)
     } catch (error) {
         throw new AppError(404, "User doesn't exist")

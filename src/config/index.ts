@@ -27,7 +27,7 @@ const {
 
 export const mongoConfig = {
     mongoURL:
-        appConfig.env === 'test'
+        appConfig.env === 'testing'
             ? process.env.MONGO_URI
             : `mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=admin`,
 }
