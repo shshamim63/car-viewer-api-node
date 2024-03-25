@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import mongoose, { ConnectOptions } from 'mongoose'
 import request from 'supertest'
-import { v4 as uuidv4 } from 'uuid'
+import { faker } from '@faker-js/faker'
 
 import { app } from '../../../src/app'
 import * as userDB from '../../../src/dataAccess/user.db'
@@ -43,7 +43,9 @@ describe('Auth/User/Activation', () => {
                 throw new CustomError('invalid signature ', 401)
             })
             const data = await request(app).post(
-                `/auth/user/activate?token=${uuidv4()}`
+                `/auth/user/activate?token=${faker.string.hexadecimal({
+                    length: 64,
+                })}`
             )
             expect(JSON.parse(data.text).message).toEqual(
                 'Invalid authorization error'
@@ -64,7 +66,9 @@ describe('Auth/User/Activation', () => {
                 'generateAuthenticatedUserInfo'
             ).mockResolvedValue(user)
             const data = await request(app).post(
-                `/auth/user/activate?token=${uuidv4()}`
+                `/auth/user/activate?token=${faker.string.hexadecimal({
+                    length: 64,
+                })}`
             )
             const responseText = JSON.parse(data.text)
             expect(responseText.data.username).toEqual(user.username)

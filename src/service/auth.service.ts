@@ -45,6 +45,7 @@ export const login = async (
     next: NextFunction
 ): Promise<IAuthenticatedUser> => {
     try {
+        console.log('I am here')
         const query = {
             email: body.email,
         }
