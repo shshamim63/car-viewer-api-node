@@ -45,7 +45,6 @@ export const login = async (
     next: NextFunction
 ): Promise<IAuthenticatedUser> => {
     try {
-        console.log('I am here')
         const query = {
             email: body.email,
         }
@@ -111,19 +110,18 @@ export const registerUser = async (
     }
 }
 
-export const refreshToken = async (body: IActivateUserQuery) => {
-    const decodedUser: IUser = verifyToken(
-        body.token,
-        authConfig.refreshTokenSecret
-    )
-    const currentUser = await userDB.findOneUser({ _id: decodedUser.id })
-    if (!currentUser)
-        throw new AppError(
-            404,
-            'Invalid user credential',
-            `User does not exist with email: ${decodedUser.email}`
+export const refreshToken = async (token: string, next: NextFunction) => {
+    try {
+        const decodedUser: IUser = verifyToken(
+            token,
+            authConfig.refreshTokenSecret
         )
+        const currentUser = await userDB.findOneUser({ _id: decodedUser.id })
+        if (!currentUser) throw new AppError(401, 'Invalid user credential')
 
-    const userInfo = convertToUserResponse(currentUser)
-    return await userDB.generateAccessInfo(userInfo)
+        const userInfo = convertToUserResponse(currentUser)
+        return await userDB.generateAccessInfo(userInfo)
+    } catch (error) {
+        next(error)
+    }
 }

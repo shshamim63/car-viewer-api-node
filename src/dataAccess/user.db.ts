@@ -79,6 +79,10 @@ export const saveRefreshToken = async (
     refreshToken: string,
     userId: string
 ) => {
-    const token = new RefreshToken({ userId: userId, token: refreshToken })
-    await token.save()
+    try {
+        const token = new RefreshToken({ userId: userId, token: refreshToken })
+        await token.save()
+    } catch (error) {
+        throw new AppError(500, 'Server Error')
+    }
 }
