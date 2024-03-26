@@ -6,11 +6,6 @@ import { app } from '../../../src/app'
 import * as authService from '../../../src/service/auth.service'
 
 import { mongoConfig } from '../../../src/config'
-import { NextFunction } from 'express'
-
-jest.mock('jsonwebtoken', () => ({
-    verify: jest.fn(),
-}))
 
 describe('Auth/User/Activation', () => {
     beforeAll(async () => {
@@ -18,6 +13,7 @@ describe('Auth/User/Activation', () => {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         } as ConnectOptions)
+        await mongoose.connection.dropDatabase()
     })
 
     afterAll(async () => {
@@ -51,6 +47,28 @@ describe('Auth/User/Activation', () => {
             expect(response.status).toEqual(200)
             expect(JSON.parse(response.text).data.accessToken).toBeTruthy()
             expect(authService.refreshToken).toHaveBeenCalled()
+        })
+    })
+    describe('Refresh token success', () => {
+        test('Should provide new token when user is present', async () => {
+            const demoPassword = faker.internet.password()
+            const userRequestBody = {
+                username: faker.internet.userName(),
+                email: faker.internet.email(),
+                password: demoPassword,
+                confirmPassword: demoPassword,
+            }
+            await request(app).post('/auth/registration').send(userRequestBody)
+            const loginResponse = await request(app).post('/auth/login').send({
+                email: userRequestBody.email,
+                password: userRequestBody.password,
+            })
+            const { refreshToken } = JSON.parse(loginResponse.text).data
+            const response = await request(app)
+                .post('/auth/refresh/token')
+                .set('token', refreshToken)
+            expect(response.status).toEqual(200)
+            expect(JSON.parse(response.text).data.accessToken).toBeTruthy()
         })
     })
 })

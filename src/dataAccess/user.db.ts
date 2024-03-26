@@ -64,7 +64,6 @@ export const generateAuthenticatedUserInfo = async (
         authConfig.refreshTokenSecret,
         '1d'
     )
-
     if (refreshToken) {
         await saveRefreshToken(refreshToken, user.id)
     }
