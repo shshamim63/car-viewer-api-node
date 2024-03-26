@@ -5,7 +5,9 @@ import { faker } from '@faker-js/faker'
 import { app } from '../../../src/app'
 import * as authService from '../../../src/service/auth.service'
 
+import * as MailHelper from '../../../src/util/mailer'
 import { mongoConfig } from '../../../src/config'
+import { MailConfirmation } from '../../../src/model/utils/mailer'
 
 describe('Auth/User/Activation', () => {
     beforeAll(async () => {
@@ -58,6 +60,12 @@ describe('Auth/User/Activation', () => {
                 password: demoPassword,
                 confirmPassword: demoPassword,
             }
+            jest.spyOn(MailHelper, 'sendMailToUser').mockImplementation(
+                () =>
+                    Promise.resolve({
+                        response: 'Email sent successfully',
+                    }) as Promise<MailConfirmation>
+            )
             await request(app).post('/auth/registration').send(userRequestBody)
             const loginResponse = await request(app).post('/auth/login').send({
                 email: userRequestBody.email,
