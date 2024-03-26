@@ -119,6 +119,31 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/InvalidResponse'
+    /auth/refresh/token:
+        post:
+            tags:
+                - Auth
+            summary: Resresh Token Route
+            description: Allows user to create a user access token
+            parameters:
+                - in: header
+                  name: token
+                  schema:
+                      type: string
+                  description: Refresh token
+            responses:
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UnAuthorizedResponse'
+                '200':
+                    description: Returns a JSON object when token is valid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AuthorizedUser'
 components:
     requestBodies:
         RegistrationBody:
@@ -148,7 +173,7 @@ components:
             properties:
                 message:
                     $ref: '#/components/schemas/AuthenticatedUser'
-        AuthenticatedUser:
+        AuthorizedUser:
             type: object
             required:
                 - avatar
@@ -161,7 +186,6 @@ components:
                 - updatedAt
                 - username
                 - accessToken
-                - refreshToken
             properties:
                 avatar:
                     type: string
@@ -206,10 +230,18 @@ components:
                     type: string
                     description: Access Token
                     example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.....
-                refreshToken:
-                    type: string
-                    description: Refresh Token
-                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.....
+        AuthenticatedUser:
+            allOf:
+                - $ref: '#/components/schemas/AuthorizedUser'
+                - type: object
+                  required:
+                      - confirmPassword
+                      - username
+                  properties:
+                      refreshToken:
+                          type: string
+                          description: Refresh Token
+                          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.....
         InvalidResponse:
             type: object
             required:
@@ -295,6 +327,8 @@ components:
                           example: https://user:101/profile/picture
         UnAuthorizedResponse:
             type: object
+            required:
+                - message
             properties:
                 message:
                     type: string
