@@ -72,6 +72,24 @@ export const login = async (
     }
 }
 
+export const logout = async (
+    token: string,
+    next: NextFunction
+): Promise<string> => {
+    try {
+        const decodedUser: IUser = verifyToken(
+            token,
+            authConfig.refreshTokenSecret
+        )
+        if (decodedUser) {
+            await userDB.deleteToken({ token: token })
+            return 'Logout successfull'
+        }
+    } catch (error) {
+        next(error)
+    }
+}
+
 export const registerUser = async (
     body: IRegistrationBody,
     next: NextFunction
@@ -112,15 +130,20 @@ export const registerUser = async (
 
 export const refreshToken = async (token: string, next: NextFunction) => {
     try {
-        const decodedUser: IUser = verifyToken(
-            token,
-            authConfig.refreshTokenSecret
-        )
-        const currentUser = await userDB.findOneUser({ _id: decodedUser.id })
-        if (!currentUser) throw new AppError(401, 'Invalid user credential')
+        const validToken = userDB.findRefreshToken(token)
+        if (validToken) {
+            const decodedUser: IUser = verifyToken(
+                token,
+                authConfig.refreshTokenSecret
+            )
+            const currentUser = await userDB.findOneUser({
+                _id: decodedUser.id,
+            })
+            if (!currentUser) throw new AppError(401, 'Invalid user credential')
 
-        const userInfo = convertToUserResponse(currentUser)
-        return await userDB.generateAccessInfo(userInfo)
+            const userInfo = convertToUserResponse(currentUser)
+            return await userDB.generateAccessInfo(userInfo)
+        }
     } catch (error) {
         next(error)
     }

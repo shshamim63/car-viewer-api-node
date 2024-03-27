@@ -74,6 +74,16 @@ export const generateAuthenticatedUserInfo = async (
     }
 }
 
+export const findRefreshToken = async (token: string) => {
+    try {
+        const currentToken = RefreshToken.findOne({ token: token })
+        if (!currentToken) throw new AppError(401, 'Unauthorized Request')
+        return currentToken
+    } catch (error) {
+        throw new AppError(500, 'Server error')
+    }
+}
+
 export const saveRefreshToken = async (
     refreshToken: string,
     userId: string
@@ -81,6 +91,14 @@ export const saveRefreshToken = async (
     try {
         const token = new RefreshToken({ userId: userId, token: refreshToken })
         await token.save()
+    } catch (error) {
+        throw new AppError(500, 'Server Error')
+    }
+}
+
+export const deleteToken = async (query: Query) => {
+    try {
+        await RefreshToken.deleteOne(query)
     } catch (error) {
         throw new AppError(500, 'Server Error')
     }

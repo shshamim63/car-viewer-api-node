@@ -46,6 +46,26 @@ export const login = async (
     }
 }
 
+export const logout = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const headers = req.headers
+        const currentHeaders = schemaValidation(
+            ActivateUserQuerySchema,
+            headers
+        )
+        const response = await authService.logout(
+            currentHeaders.token as string,
+            next
+        )
+        if (response) res.status(200).send(formatResponse(response))
+    } catch (error) {
+        next(error)
+    }
+}
 export const registerUser = async (
     req: Request,
     res: Response,
