@@ -31,7 +31,30 @@ services:
             - data:/data/db
         networks:
             - node-server
+    prom-server:
+        image: prom/prometheus
+        ports:
+            - 9090:9090
+        depends_on:
+            - api
+        volumes:
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml
+        command:
+            - --config.file=/etc/prometheus/prometheus.yml
+        networks:
+            - node-server
+    grafana:
+        image: grafana/grafana:latest
+        depends_on:
+            - prom-server
+        ports:
+            - 3000:3000
+        volumes:
+            - grafana-storage:/var/lib/grafana
+        networks:
+            - node-server
 networks:
     node-server:
 volumes:
     data:
+    grafana-storage:
