@@ -26,11 +26,20 @@ collectDefaultMetrics({
 })
 
 const reqResTime = new client.Histogram({
-    name: 'http_express_req_time',
-    help: 'this tells how much time is taken by req and res',
+    name: 'http_express_req_res_time',
+    help: 'This tells how much time is taken by req and res',
     labelNames: ['method', 'route', 'status_code'],
     buckets: [1, 50, 100, 200, 400, 500, 800, 1000, 2000],
 })
+app.use(
+    responseTime((req, res, time) => {
+        const { method } = req
+        const { route } = req.url
+        const { statusCode } = res
+        console.log('Url', route)
+        reqResTime.labels(method, route, statusCode).observe(time)
+    })
+)
 
 const swaggerDocument = YAML.load('./swagger/staging.yaml')
 const options = {
@@ -45,18 +54,6 @@ app.use(
 app.use(bodyParser.json())
 
 app.use(corsMiddleware)
-
-app.use(
-    responseTime((req, res, time) => {
-        reqResTime
-            .labels({
-                method: req.method,
-                route: req.url,
-                status_code: res.statusCode,
-            })
-            .observe(time)
-    })
-)
 
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options))
 
