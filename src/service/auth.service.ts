@@ -116,11 +116,11 @@ export const registerUser = async (
             name: data.username,
         }
 
-        MailHelper.sendMailToUser({
-            email: data.email,
-            context: context,
-            template: 'verification-mail',
-        })
+        // MailHelper.sendMailToUser({
+        //     email: data.email,
+        //     context: context,
+        //     template: 'verification-mail',
+        // })
 
         return 'Registration successful, please check email to verify your account'
     } catch (error) {

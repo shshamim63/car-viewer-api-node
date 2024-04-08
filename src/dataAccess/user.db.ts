@@ -11,13 +11,7 @@ export const createUser = async (data: IUser): Promise<IUser> => {
         return savedUser
     } catch (error) {
         if (error.code === 11000) {
-            throw new AppError(
-                409,
-                `User exists with the following ${JSON.stringify(
-                    error.keyValue
-                )}`,
-                error.keyValue
-            )
+            throw new AppError(409, `User already exists`, error.keyValue)
         } else {
             throw new AppError(500, 'Server error')
         }
