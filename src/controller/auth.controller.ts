@@ -53,6 +53,7 @@ export const logout = async (
 ) => {
     try {
         const headers = req.headers
+        console.log('length', headers)
         const currentHeaders = schemaValidation(
             ActivateUserQuerySchema,
             headers

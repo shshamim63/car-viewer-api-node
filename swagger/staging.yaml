@@ -22,7 +22,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ActiveMessage'
-    /user/registration:
+    /auth/registration:
         post:
             tags:
                 - Auth
@@ -49,7 +49,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/UserExistResponse'
-    /user/login:
+    /auth/login:
         post:
             tags:
                 - Auth
@@ -82,7 +82,40 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/InvalidResponse'
-    /activate/user:
+    /auth/logout:
+        post:
+            tags: 
+                - Auth
+            summary: Logout Route
+            description: Allows user to logout
+            parameters:
+              - in: header
+                name: token
+                schema:
+                    type: string
+                    format: uuid
+                required: true
+            responses:
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UnAuthorizedResponse'
+                '400':
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InvalidResponse'
+                '200':
+                    description: Returns a JSON object when creadentials are valid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/LogoutSuccess'
+                    
+    /auth/user/activate:
         post:
             tags:
                 - Auth
@@ -256,6 +289,20 @@ components:
                     maxItems: 5
                     items:
                         $ref: '#/components/schemas/InvalidSchema'
+        InvalidTokenSchema:
+            type: object
+            required:
+                - message
+                - description
+            properties:
+                message:
+                    type: string
+                    example: Invalid Schema
+                description:
+                    type: array
+                    maxItems: 5
+                    items:
+                        $ref: '#/components/schemas/InvalidSchema'
         InvalidSchema:
             type: object
             properties:
@@ -288,6 +335,15 @@ components:
                     type: string
                     description: Password of the user.
                     example: 123456789
+        LogoutSuccess:
+            type: object
+            required:
+                - message
+            properties:
+                message:
+                    type: string
+                    description: Success message.
+                    example: Logout successfull
         NotFoundResponse:
             type: object
             properties:

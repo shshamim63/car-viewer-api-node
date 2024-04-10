@@ -8,7 +8,7 @@ export const ZodActiveStatusEnum = z.enum(ACTIVESTATUS)
 export const ZodRoleEnum = z.enum(ROLE)
 
 export const ActivateUserQuerySchema = z.object({
-    token: z.string().length(64),
+    token: z.string(),
 })
 
 export const LoginBodySchema = z.object({
