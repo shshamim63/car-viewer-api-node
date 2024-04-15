@@ -11,6 +11,11 @@ export const ActivateUserQuerySchema = z.object({
     token: z.string(),
 })
 
+export const LogoutHeaderSchema = z.object({
+    refresh_token: z.string(),
+})
+
+
 export const LoginBodySchema = z.object({
     email: email,
     password: z.string().min(8),

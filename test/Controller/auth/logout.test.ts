@@ -27,7 +27,7 @@ describe('Auth/Login', () => {
     })
     describe('Token validation', () => {
       test('Should throw error when request header missing token', async () => {
-        await request(app).post('/auth/logout', )
+        await request(app).post('/auth/logout')
       })
     })
 })

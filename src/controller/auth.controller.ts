@@ -8,6 +8,7 @@ import * as authService from '../service/auth.service'
 import {
     ActivateUserQuerySchema,
     LoginBodySchema,
+    LogoutHeaderSchema,
     RegistrationBodySchema,
 } from '../model/user/user.schema'
 import {
@@ -53,13 +54,9 @@ export const logout = async (
 ) => {
     try {
         const headers = req.headers
-        console.log('length', headers)
-        const currentHeaders = schemaValidation(
-            ActivateUserQuerySchema,
-            headers
-        )
+        const currentHeaders = schemaValidation(LogoutHeaderSchema, headers)
         const response = await authService.logout(
-            currentHeaders.token as string,
+            currentHeaders.refresh_token as string,
             next
         )
         if (response) res.status(200).send(formatResponse(response))
