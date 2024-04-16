@@ -1,4 +1,3 @@
-import mongoose, { ConnectOptions } from 'mongoose'
 import request from 'supertest'
 
 import { app } from '../../../src/app'
@@ -10,22 +9,9 @@ import * as MailHelper from '../../../src/util/mailer'
 import { IRegistrationBody } from '../../../src/model/user/user.model'
 import { User } from '../../../src/model/user/user.mongo.schema'
 
-import { mongoConfig } from '../../../src/config'
 import { CustomError } from './helper/error'
 
 describe('Auth/Registration', () => {
-    beforeAll(async () => {
-        await mongoose.connect(mongoConfig.mongoURL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        } as ConnectOptions)
-        await mongoose.connection.dropDatabase()
-    })
-
-    afterAll(async () => {
-        await mongoose.connection.close()
-    })
-
     afterEach(() => {
         jest.clearAllMocks()
         jest.resetAllMocks()
@@ -213,7 +199,11 @@ describe('Auth/Registration', () => {
                 const createUserSpy = jest
                     .spyOn(userDB, 'createUser')
                     .mockResolvedValue(requestBody)
-                const mailSpy = jest.spyOn(MailHelper, 'sendMailToUser')
+                const mailSpy = jest
+                    .spyOn(MailHelper, 'sendMailToUser')
+                    .mockImplementation(() =>
+                        Promise.resolve({ response: 'Email sent successfully' })
+                    )
                 requestBody.confirmPassword = requestBody.password
                 const data = await request(app)
                     .post('/auth/registration')
@@ -228,7 +218,11 @@ describe('Auth/Registration', () => {
         })
         describe('Creation validation', () => {
             test('Should create data without any error', async () => {
-                const mailSpy = jest.spyOn(MailHelper, 'sendMailToUser')
+                const mailSpy = jest
+                    .spyOn(MailHelper, 'sendMailToUser')
+                    .mockImplementation(() =>
+                        Promise.resolve({ response: 'Email sent successfully' })
+                    )
                 const data = await request(app)
                     .post('/auth/registration')
                     .send(requestBody)

@@ -1,4 +1,3 @@
-import mongoose, { ConnectOptions } from 'mongoose'
 import request from 'supertest'
 import { faker } from '@faker-js/faker'
 
@@ -6,22 +5,9 @@ import { app } from '../../../src/app'
 import * as authService from '../../../src/service/auth.service'
 
 import * as MailHelper from '../../../src/util/mailer'
-import { mongoConfig } from '../../../src/config'
 import { MailConfirmation } from '../../../src/model/utils/mailer'
 
 describe('Auth/User/Activation', () => {
-    beforeAll(async () => {
-        await mongoose.connect(mongoConfig.mongoURL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        } as ConnectOptions)
-        await mongoose.connection.dropDatabase()
-    })
-
-    afterAll(async () => {
-        await mongoose.connection.close()
-    })
-
     afterEach(() => {
         jest.clearAllMocks()
         jest.resetAllMocks()

@@ -31,3 +31,7 @@ export const mongoConfig = {
             ? process.env.MONGO_URI
             : `mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=admin`,
 }
+
+export const lokiConfig = {
+    URL: process.env.LOKI_HOST_URL,
+}
