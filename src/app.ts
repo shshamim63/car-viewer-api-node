@@ -14,7 +14,6 @@ import * as authRoutes from './routes/auth'
 import { errorHandlerMiddleware } from './middlewares/errorHandler.middleware'
 import { invalidRouteMiddleware } from './middlewares/invalidRoute.middleware'
 import { corsMiddleware } from './middlewares/cors.middleware'
-import { logger } from './util/logger'
 
 connectDB()
 
@@ -62,8 +61,6 @@ const swaggerDocument = YAML.load('./swagger/staging.yaml')
 const options = {
     explorer: true,
 }
-
-logger.info('Running')
 
 app.use(
     bodyParser.urlencoded({

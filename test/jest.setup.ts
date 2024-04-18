@@ -1,6 +1,12 @@
 import mongoose, { ConnectOptions } from 'mongoose'
 import { mongoConfig } from '../src/config'
-import { logger } from '../src/util/logger'
+
+jest.mock('../src/util/logger', () => ({
+    logger: {
+        info: jest.fn(),
+        error: jest.fn(),
+    },
+}))
 
 beforeAll(async () => {
     await mongoose.connect(mongoConfig.mongoURL, {
@@ -12,5 +18,4 @@ beforeAll(async () => {
 afterAll(async () => {
     await mongoose.connection.dropDatabase()
     await mongoose.connection.close()
-    await logger.close()
 })
