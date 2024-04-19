@@ -2,12 +2,12 @@ import request from 'supertest'
 
 import { app } from '../../../src/app'
 
-import * as userDB from '../../../src/dataAccess/user.db'
+import * as userDB from '../../../src/dataAccess/userRepository'
 
 import * as MailHelper from '../../../src/util/mailer'
 
 import { IRegistrationBody } from '../../../src/model/user/user.model'
-import { User } from '../../../src/model/user/user.mongo.schema'
+import { User } from '../../../src/model/user.mongo.schema'
 
 import { CustomError } from './helper/error'
 

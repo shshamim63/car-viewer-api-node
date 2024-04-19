@@ -1,7 +1,7 @@
 import { ICarBrandRequestBody, ICarRequestBody } from '../model/car/cars.model'
 import { AppError } from '../util/appError'
 
-import * as carDB from '../dataAccess/car.db'
+import * as carDB from '../dataAccess/carRepository'
 
 export const createCarRecord = async (
     body: ICarRequestBody

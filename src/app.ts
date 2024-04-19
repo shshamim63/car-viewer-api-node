@@ -9,7 +9,7 @@ import { connectDB } from './config/mongoDB'
 
 import * as defaultRoutes from './routes/default'
 import * as carRouters from './routes/cars'
-import * as authRoutes from './routes/auth'
+import * as authRoutes from './routes/auth.route'
 
 import { errorHandlerMiddleware } from './middlewares/errorHandler.middleware'
 import { invalidRouteMiddleware } from './middlewares/invalidRoute.middleware'

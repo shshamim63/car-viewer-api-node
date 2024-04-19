@@ -3,8 +3,9 @@ import { faker } from '@faker-js/faker'
 
 import { app } from '../../../src/app'
 import * as authService from '../../../src/service/auth.service'
-import * as userDB from '../../../src/dataAccess/user.db'
+import * as userDB from '../../../src/dataAccess/userRepository'
 import { IAuthenticatedUser } from '../../../src/model/user/user.model'
+import { generateAuthenticatedUserResponse } from '../../data/user'
 
 describe('Auth/Login', () => {
     beforeEach(() => {
@@ -18,24 +19,8 @@ describe('Auth/Login', () => {
         password: faker.internet.password(),
     }
 
-    const responseUser = {
-        email: requestBody.email,
-        status: 'Pending',
-        avatar: faker.image.avatar(),
-        createdAt: new Date(),
-        id: faker.database.mongodbObjectId(),
-        profileId: faker.database.mongodbObjectId(),
-        role: 'user',
-        updatedAt: new Date(),
-        username: faker.internet.userName(),
-        accessToken: faker.string.hexadecimal({
-            length: 64,
-        }),
-        refreshToken: faker.string.hexadecimal({
-            length: 64,
-        }),
-        authorizationType: 'Bearer',
-    }
+    const responseUser = generateAuthenticatedUserResponse(requestBody.email)
+
     describe('Request body validation', () => {
         test('Should throw error when request body does not contain any property', async () => {
             const response = await request(app).post('/auth/login')

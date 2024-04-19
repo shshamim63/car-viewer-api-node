@@ -1,10 +1,9 @@
 import jwt from 'jsonwebtoken'
 
-import { IUser } from '../model/user/user.model'
 import { AppError } from './appError'
 
 export const generateToken = (
-    user: IUser,
+    user: any,
     token: string,
     expiresIn: string = null
 ): string => {
@@ -17,10 +16,10 @@ export const generateToken = (
     }
 }
 
-export const verifyToken = (token: string, secret: string): IUser => {
+export const verifyToken = (token: string, secret: string): any => {
     try {
         const user = jwt.verify(token, secret)
-        return user as IUser
+        return user as any
     } catch (error) {
         throw new AppError(401, 'Invalid authorization error')
     }

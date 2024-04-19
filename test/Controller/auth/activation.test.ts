@@ -3,10 +3,10 @@ import request from 'supertest'
 import { faker } from '@faker-js/faker'
 
 import { app } from '../../../src/app'
-import * as userDB from '../../../src/dataAccess/user.db'
+import * as userDB from '../../../src/dataAccess/userRepository'
 
 import { CustomError } from './helper/error'
-import { User } from '../../../src/model/user/user.mongo.schema'
+import { User } from '../../../src/model/user.mongo.schema'
 
 jest.mock('jsonwebtoken', () => ({
     verify: jest.fn(),
