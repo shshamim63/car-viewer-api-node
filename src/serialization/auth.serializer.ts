@@ -1,15 +1,14 @@
-export const convertToUserResponse = (data: any): any => {
-    const userInfo = {
+import { MongoUser, User } from '../interfaces/user.interface'
+
+export const userSerializer = (data: MongoUser): User => {
+    return {
         avatar: data.avatar ?? '',
         createdAt: data.createdAt,
         email: data.email,
-        id: data.id,
-        profileId: data.profileId,
+        id: data._id.toString(),
         role: data.role,
         status: data.status,
-        authorizationType: 'Bearer',
         updatedAt: data.updatedAt,
         username: data.username,
-    } as any
-    return userInfo
+    }
 }

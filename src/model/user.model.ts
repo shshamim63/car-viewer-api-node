@@ -7,7 +7,7 @@ const UserSchema = new Schema(
         email: { type: String, required: true, index: { unique: true } },
         passwordHash: { type: String, required: true },
         role: { type: String, enum: ROLE, default: 'user' },
-        status: { type: String, enum: ACTIVESTATUS, default: 'Pending' },
+        status: { type: String, enum: ACTIVESTATUS, default: 'Inactive' },
         username: { type: String, required: true, unique: true },
     },
     { timestamps: true }
@@ -52,4 +52,4 @@ UserSchema.post('save', async function (doc, next) {
 
 export const User = model('User', UserSchema)
 export const Profile = model('Profile', ProfileSchema)
-export const RefreshToken = model('AuthToken', RefreshTokenSchema)
+export const RefreshToken = model('RefreshToken', RefreshTokenSchema)

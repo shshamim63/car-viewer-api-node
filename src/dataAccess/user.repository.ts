@@ -1,13 +1,19 @@
+import { Types } from 'mongoose'
 import { AppError } from '../util/appError'
 
 import { RefreshToken, User } from '../model/user.model'
-import { NewUser } from '../interfaces/user.interface'
+import {
+    MongoUser,
+    NewUser,
+    UserRole,
+    UserStatus,
+} from '../interfaces/user.interface'
+import { MongoQuery } from '../interfaces/mongo.interface'
 
 export const createUser = async (data: NewUser): Promise<any> => {
     try {
         const user = await User.create(data)
-        console.log('Saved user', user)
-        return user
+        return user.toObject()
     } catch (error) {
         if (error.code === 11000) {
             throw new AppError(409, `User already exists`, error.keyValue)
@@ -17,10 +23,17 @@ export const createUser = async (data: NewUser): Promise<any> => {
     }
 }
 
-export const findOneUser = async (query: any): Promise<any | null> => {
+export const findOneUser = async (
+    query: MongoQuery
+): Promise<MongoUser | null> => {
     try {
         const user = await User.findOne(query)
-        return user
+        if (!user) return null
+        const currentUser = user.toObject()
+        const role = currentUser.role as UserRole
+        const status = currentUser.status as UserStatus
+
+        return { ...currentUser, role, status }
     } catch (error) {
         throw new AppError(500, 'Server error')
     }
@@ -49,7 +62,7 @@ export const findRefreshToken = async (token: string) => {
 
 export const saveRefreshToken = async (
     refreshToken: string,
-    userId: string
+    userId: Types.ObjectId
 ) => {
     try {
         const token = new RefreshToken({ userId: userId, token: refreshToken })

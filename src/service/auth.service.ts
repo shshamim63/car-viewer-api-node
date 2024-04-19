@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import { NextFunction } from 'express'
 
-import * as userDB from '../dataAccess/userRepository'
+import * as userDB from '../dataAccess/user.repository'
 
 import { appConfig, authConfig } from '../config'
 import { SALTROUNDS } from '../const'
@@ -9,12 +9,13 @@ import { generateToken, verifyToken } from '../util/jwt'
 
 import { AppError } from '../util/appError'
 
-import { convertToUserResponse } from '../serialization/auth.serializer'
 import * as MailHelper from '../util/mailer'
 import {
+    AuthenticatedUser,
     LoginRequestBody,
     SignupRequestBody,
 } from '../interfaces/user.interface'
+import { userSerializer } from '../serialization/auth.serializer'
 
 // export const activateUserAccount = async (
 //     query: any,
@@ -38,7 +39,7 @@ import {
 export const login = async (
     body: LoginRequestBody,
     next: NextFunction
-): Promise<any> => {
+): Promise<AuthenticatedUser> => {
     try {
         const query = {
             email: body.email,
@@ -57,7 +58,6 @@ export const login = async (
             body.password,
             currentUser.passwordHash
         )
-
         if (!authenticate)
             throw new AppError(
                 401,
@@ -65,20 +65,25 @@ export const login = async (
                 `Invalid password`
             )
 
-        const userInfo = convertToUserResponse(currentUser)
+        const serializedUser = userSerializer(currentUser)
+
         const accessToken = generateToken(
-            userInfo,
+            serializedUser,
             authConfig.accessTokenSecret,
             '15m'
         )
+
         const refreshToken = generateToken(
-            userInfo,
+            serializedUser,
             authConfig.refreshTokenSecret,
             '1d'
         )
-        await userDB.saveRefreshToken(refreshToken, currentUser.id)
+        await userDB.saveRefreshToken(refreshToken, currentUser._id)
         return {
-            userInfo,
+            ...serializedUser,
+            refreshToken,
+            accessToken,
+            type: 'Bearer',
         }
     } catch (error) {
         next(error)
@@ -117,23 +122,23 @@ export const registerUser = async (
 
         const user = await userDB.createUser(newUser)
 
-        // const userInfo = convertToUserResponse(user)
+        const userInfo = userSerializer(user)
+        console.log('Userinfo', userInfo)
+        const activationToken = generateToken(
+            userInfo,
+            authConfig.accessTokenSecret
+        )
 
-        // const activationToken = generateToken(
-        //     userInfo,
-        //     authConfig.accessTokenSecret
-        // )
+        const context = {
+            url: `${appConfig.baseURL}/auth/user/activate?token=${activationToken}`,
+            name: data.username,
+        }
 
-        // const context = {
-        //     url: `${appConfig.baseURL}/auth/user/activate?token=${activationToken}`,
-        //     name: data.username,
-        // }
-
-        // MailHelper.sendMailToUser({
-        //     email: data.email,
-        //     context: context,
-        //     template: 'verification-mail',
-        // })
+        MailHelper.sendMailToUser({
+            email: data.email,
+            context: context,
+            template: 'verification-mail',
+        })
 
         return 'Registration successful, please check email to verify your account'
     } catch (error) {
