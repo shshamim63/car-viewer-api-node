@@ -10,9 +10,8 @@ export const loginSchema = z.object({
 
 export const signupSchema = loginSchema
     .extend({
-        avatar: z.string().optional().default(''),
-        email: emailSchema,
-        username: z.string().min(5),
+        avatar: z.string().url().optional(),
+        username: z.string().min(8),
         confirmPassword: passwordScchema,
     })
     .refine((data) => data.password === data.confirmPassword, {

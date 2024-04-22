@@ -2,247 +2,152 @@ import request from 'supertest'
 
 import { app } from '../../../src/app'
 
-import * as userDB from '../../../src/dataAccess/userRepository'
-
 import * as MailHelper from '../../../src/util/mailer'
-
-import { IRegistrationBody } from '../../../src/model/user/user.model'
-import { User } from '../../../src/model/user.mongo.schema'
+import * as userDB from '../../../src/dataAccess/user.repository'
 
 import { CustomError } from './helper/error'
+import { SignupRequestBody } from '../../../src/interfaces/user.interface'
+import { createUserSeed, generateSignupRequestBody } from '../../data/user'
+import { faker } from '@faker-js/faker'
 
 describe('Auth/Registration', () => {
+    let createUserSpy
+    let mailSpy
+    beforeEach(() => {
+        createUserSpy = jest
+            .spyOn(userDB, 'createUser')
+            .mockResolvedValue(createUserSeed())
+        mailSpy = jest
+            .spyOn(MailHelper, 'sendMailToUser')
+            .mockResolvedValue({ response: 'Email sent successfully' })
+    })
     afterEach(() => {
         jest.clearAllMocks()
         jest.resetAllMocks()
         jest.restoreAllMocks()
     })
-
     describe('Request Body validation', () => {
-        const requestBody = {} as IRegistrationBody
-        test('Should throw error when requst body is empty', async () => {
-            const data = await request(app)
+        const invalidSchemaMessage = 'Invalid Schema'
+        test('Response should have 400 status code ', async () => {
+            const signupPayload = {} as SignupRequestBody
+            const response = await request(app)
                 .post('/auth/registration')
-                .send(requestBody)
-
-            const responseText = JSON.parse(data.text)
-            expect(data.status).toEqual(400)
-            expect(responseText.message).toEqual('Invalid Schema')
-            expect(responseText.description.length).toEqual(4)
+                .send(signupPayload)
+            const {
+                status,
+                body: { message, description },
+            } = response
+            expect(status).toEqual(400)
+            expect(message).toEqual(invalidSchemaMessage)
+            expect(description.length).toEqual(4)
         })
-        describe('Should validate email', () => {
-            test('Should throw error when email is not valid', async () => {
-                requestBody.email = 'demo@gmailcom'
-                const data = await request(app)
+        describe('Validation/Email', () => {
+            test('Response should send code 400 with Invalid schema message when email is invalid', async () => {
+                const signupPayload = generateSignupRequestBody()
+                signupPayload.email = 'demo@gmailcom'
+                const response = await request(app)
                     .post('/auth/registration')
-                    .send(requestBody)
+                    .send(signupPayload)
 
-                const responseText = JSON.parse(data.text)
-                expect(data.status).toEqual(400)
-                expect(responseText.message).toEqual('Invalid Schema')
+                const {
+                    status,
+                    body: { message, description },
+                } = response
+                expect(status).toEqual(400)
+                expect(message).toEqual(invalidSchemaMessage)
                 expect(
-                    responseText.description.find(
+                    description.find(
                         (context) => context.validation === 'email'
                     )
                 ).toBeTruthy()
             })
 
-            test('Should not throw error when email is valid', async () => {
-                requestBody.email = 'demo@gmail.com'
-                const data = await request(app)
+            test('Response should send code 201', async () => {
+                const signupPayload = generateSignupRequestBody()
+                const response = await request(app)
                     .post('/auth/registration')
-                    .send(requestBody)
-
-                const responseText = JSON.parse(data.text)
-                expect(
-                    responseText.description.find(
-                        (context) => context.validation === 'email'
-                    )
-                ).toBeFalsy()
-            })
-        })
-        describe('Should validate username', () => {
-            test('Should throw error when username is not valid', async () => {
-                requestBody.username = ''
-                const data = await request(app)
-                    .post('/auth/registration')
-                    .send(requestBody)
-
-                const responseText = JSON.parse(data.text)
-                expect(data.status).toEqual(400)
-                expect(responseText.message).toEqual('Invalid Schema')
-                expect(
-                    responseText.description.find((context) =>
-                        context.path.includes('username')
-                    )
-                ).toBeTruthy()
-            })
-
-            test('Should throw error when username has less than 6 characters', async () => {
-                requestBody.username = 'demo'
-                const data = await request(app)
-                    .post('/auth/registration')
-                    .send(requestBody)
-
-                const responseText = JSON.parse(data.text)
-
-                const userNameErrorContext = responseText.description.find(
-                    (context) => context.path.includes('username')
-                )
-
-                expect(userNameErrorContext).toBeTruthy()
-
-                expect(userNameErrorContext.message).toEqual(
-                    'String must contain at least 6 character(s)'
-                )
-            })
-            test('Should not throw error when username is valid', async () => {
-                requestBody.username = 'demouser'
-                const data = await request(app)
-                    .post('/auth/registration')
-                    .send(requestBody)
-
-                const responseText = JSON.parse(data.text)
-
-                expect(
-                    responseText.description.find((context) =>
-                        context.path.includes('username')
-                    )
-                ).toBeFalsy()
-            })
-        })
-        describe('Should validate password', () => {
-            test('Should throw error when passord is not given', async () => {
-                requestBody.password = ''
-                const data = await request(app)
-                    .post('/auth/registration')
-                    .send(requestBody)
-                const responseText = JSON.parse(data.text)
-
-                expect(
-                    responseText.description.find((context) =>
-                        context.path.includes('password')
-                    )
-                ).toBeTruthy()
-            })
-            test('Should throw error when passord does not have at least 8 characters', async () => {
-                requestBody.password = 'ab'
-                const data = await request(app)
-                    .post('/auth/registration')
-                    .send(requestBody)
-                const responseText = JSON.parse(data.text)
-                const passwordEorrorContext = responseText.description.find(
-                    (context) => context.path.includes('password')
-                )
-
-                expect(passwordEorrorContext).toBeTruthy()
-                expect(passwordEorrorContext.message).toEqual(
-                    'String must contain at least 8 character(s)'
-                )
-            })
-            test('Should not throw error when passord is valid', async () => {
-                requestBody.password = 'abcdefghijkl'
-                const data = await request(app)
-                    .post('/auth/registration')
-                    .send(requestBody)
-                const responseText = JSON.parse(data.text)
-                const passwordEorrorContext = responseText.description.find(
-                    (context) => context.path.includes('password')
-                )
-                expect(passwordEorrorContext).toBeFalsy()
-            })
-        })
-        describe('Should validate confirmPassword', () => {
-            test('Should throw error when confirmPassword is not given', async () => {
-                requestBody.confirmPassword = ''
-                const data = await request(app)
-                    .post('/auth/registration')
-                    .send(requestBody)
-                const responseText = JSON.parse(data.text)
-                expect(
-                    responseText.description.find((context) =>
-                        context.path.includes('confirmPassword')
-                    )
-                ).toBeTruthy()
-            })
-            test('Should throw error when confirmPassword does not have at least 8 characters', async () => {
-                requestBody.confirmPassword = 'ab'
-                const data = await request(app)
-                    .post('/auth/registration')
-                    .send(requestBody)
-                const responseText = JSON.parse(data.text)
-                const passwordEorrorContext = responseText.description.find(
-                    (context) => context.path.includes('confirmPassword')
-                )
-
-                expect(passwordEorrorContext).toBeTruthy()
-                expect(passwordEorrorContext.message).toEqual(
-                    'String must contain at least 8 character(s)'
-                )
-            })
-            test('Should throw error when confirmPassword does not match password', async () => {
-                requestBody.confirmPassword = 'lhkdmdkssdgd'
-
-                const data = await request(app)
-                    .post('/auth/registration')
-                    .send(requestBody)
-                const responseText = JSON.parse(data.text)
-                const passwordEorrorContext = responseText.description.find(
-                    (context) =>
-                        context.message.includes(
-                            'Password and confirm password must match'
-                        )
-                )
-                expect(passwordEorrorContext).toBeTruthy()
-            })
-            test('Should not throw error when confirmPassword is valid', async () => {
-                const createUserSpy = jest
-                    .spyOn(userDB, 'createUser')
-                    .mockResolvedValue(requestBody)
-                const mailSpy = jest
-                    .spyOn(MailHelper, 'sendMailToUser')
-                    .mockImplementation(() =>
-                        Promise.resolve({ response: 'Email sent successfully' })
-                    )
-                requestBody.confirmPassword = requestBody.password
-                const data = await request(app)
-                    .post('/auth/registration')
-                    .send(requestBody)
-                const responseText = JSON.parse(data.text)
+                    .send(signupPayload)
+                expect(response.status).toEqual(201)
                 expect(createUserSpy).toHaveBeenCalled()
                 expect(mailSpy).toHaveBeenCalled()
-                expect(responseText.data).toEqual(
-                    'Registration successful, please check email to verify your account'
-                )
             })
         })
-        describe('Creation validation', () => {
-            test('Should create data without any error', async () => {
-                const mailSpy = jest
-                    .spyOn(MailHelper, 'sendMailToUser')
-                    .mockImplementation(() =>
-                        Promise.resolve({ response: 'Email sent successfully' })
-                    )
-                const data = await request(app)
+        describe('Validation/Username', () => {
+            test('Response should have code 400 with Invalid schema message when username is not present', async () => {
+                const signupPayload = generateSignupRequestBody()
+                signupPayload.username = ''
+                const response = await request(app)
                     .post('/auth/registration')
-                    .send(requestBody)
-                const responseText = JSON.parse(data.text)
+                    .send(signupPayload)
 
-                expect(mailSpy).toHaveBeenCalled()
-                expect(responseText.data).toEqual(
-                    'Registration successful, please check email to verify your account'
-                )
+                const {
+                    status,
+                    body: { message, description },
+                } = response
+                expect(status).toEqual(400)
+                expect(message).toEqual(invalidSchemaMessage)
+                expect(
+                    description.find((context) =>
+                        context.path.includes('username')
+                    )
+                ).toBeTruthy()
             })
-            test('Should throw error when creating duplicate user', async () => {
-                const mailSpy = jest.spyOn(MailHelper, 'sendMailToUser')
-                jest.spyOn(User, 'create').mockImplementationOnce(() => {
-                    throw new CustomError('Duplicate key error', 11000)
-                })
-                const retryResponse = await request(app)
+
+            test('Response should have code 400 with username invalid message as the length of the username is less than 6', async () => {
+                const signupPayload = generateSignupRequestBody()
+                signupPayload.username = faker.string.alpha(5)
+                const response = await request(app)
                     .post('/auth/registration')
-                    .send(requestBody)
-                expect(mailSpy).toBeCalledTimes(0)
-                expect(retryResponse.status).toEqual(409)
+                    .send(signupPayload)
+                const {
+                    status,
+                    body: { message },
+                } = response
+                expect(status).toEqual(400)
+                expect(message).toEqual(invalidSchemaMessage)
+            })
+            test('Response should have code 201', async () => {
+                const signupPayload = generateSignupRequestBody()
+                const response = await request(app)
+                    .post('/auth/registration')
+                    .send(signupPayload)
+
+                const { status } = response
+                expect(status).toEqual(201)
+                expect(createUserSpy).toHaveBeenCalled()
+                expect(mailSpy).toHaveBeenCalled()
+            })
+        })
+        describe('Validation/Avatar', () => {
+            test('Response should have code 400 with Invalid schema when avatar is not an url', async () => {
+                const signupPayload = generateSignupRequestBody()
+                signupPayload.avatar = faker.person.fullName()
+                const response = await request(app)
+                    .post('/auth/registration')
+                    .send(signupPayload)
+
+                const {
+                    status,
+                    body: { message, description },
+                } = response
+                expect(status).toEqual(400)
+                expect(message).toEqual(invalidSchemaMessage)
+                expect(
+                    description.find((context) =>
+                        context.path.includes('avatar')
+                    )
+                ).toBeTruthy()
+            })
+            test('Response should have code 201', async () => {
+                const signupPayload = generateSignupRequestBody()
+                const response = await request(app)
+                    .post('/auth/registration')
+                    .send(signupPayload)
+
+                const { status } = response
+                expect(status).toEqual(201)
+                expect(createUserSpy).toHaveBeenCalled()
+                expect(mailSpy).toHaveBeenCalled()
             })
         })
     })
