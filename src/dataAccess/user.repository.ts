@@ -7,10 +7,11 @@ import {
     NewUser,
     UserRole,
     UserStatus,
+    UserUpdateAbleFields,
 } from '../interfaces/user.interface'
 import { MongoQuery } from '../interfaces/mongo.interface'
 
-export const createUser = async (data: NewUser): Promise<any> => {
+export const createUser = async (data: NewUser): Promise<MongoUser> => {
     try {
         const user = await User.create(data)
         return user.toObject()
@@ -39,23 +40,29 @@ export const findOneUser = async (
     }
 }
 
-export const findAndUpdateUser = async (filter: any, body: any) => {
+export const findAndUpdateUser = async (
+    filter: MongoQuery,
+    payload: Partial<UserUpdateAbleFields>
+) => {
     try {
-        const response = await User.findOneAndUpdate(filter, body, {
+        const response = await User.findOneAndUpdate(filter, payload, {
             new: true,
         })
-        //return convertToUserResponse(response)
+        if (!response) throw new AppError(404, "User doesn't exist")
+        return response
     } catch (error) {
-        throw new AppError(404, "User doesn't exist")
+        if (error instanceof AppError) throw error
+        throw new AppError(500, 'Server error')
     }
 }
 
 export const findRefreshToken = async (token: string) => {
     try {
-        const currentToken = RefreshToken.findOne({ token: token })
+        const currentToken = await RefreshToken.findOne({ token: token })
         if (!currentToken) throw new AppError(401, 'Unauthorized Request')
         return currentToken
     } catch (error) {
+        if (error instanceof AppError) throw error
         throw new AppError(500, 'Server error')
     }
 }
@@ -72,9 +79,10 @@ export const saveRefreshToken = async (
     }
 }
 
-export const deleteToken = async (query: any) => {
+export const removeToken = async (query: MongoQuery): Promise<number> => {
     try {
-        await RefreshToken.deleteOne(query)
+        const { deletedCount } = await RefreshToken.deleteOne(query)
+        return deletedCount
     } catch (error) {
         throw new AppError(500, 'Server Error')
     }

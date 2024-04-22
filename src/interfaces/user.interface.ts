@@ -1,9 +1,15 @@
 import { z } from 'zod'
-import { loginSchema, signupSchema } from '../validators/auth.validator'
 import { Types } from 'mongoose'
+
+import {
+    activateAccountQuerySchema,
+    loginSchema,
+    signupSchema,
+} from '../validators/auth.validator'
 
 export type LoginRequestBody = z.infer<typeof loginSchema>
 export type SignupRequestBody = z.infer<typeof signupSchema>
+export type ActivateAccountQuery = z.infer<typeof activateAccountQuerySchema>
 
 export interface NewUser {
     email: string
@@ -26,11 +32,14 @@ export enum UserStatus {
     Inactive = 'Inactive',
 }
 
-interface UserData {
+export interface UserUpdateAbleFields {
     avatar?: string
-    email: string
     role: UserRole.Admin | UserRole.User | UserRole.Super
     status: UserStatus.Active | UserStatus.Inactive
+}
+
+interface UserData extends UserUpdateAbleFields {
+    email: string
     username: string
     createdAt: Date
     updatedAt: Date
@@ -43,6 +52,11 @@ export interface MongoUser extends UserData {
 
 export interface User extends UserData {
     id: string
+}
+
+export interface TokenPayload extends User {
+    iat: number
+    exp: number
 }
 
 export interface AuthenticatedUser extends User {

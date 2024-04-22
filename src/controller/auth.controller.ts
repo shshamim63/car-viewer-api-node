@@ -4,20 +4,19 @@ import { formatResponse } from '../util/formatResponse'
 
 import * as authService from '../service/auth.service'
 
-// export const activateUserAccount = async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-// ) => {
-//     try {
-//         const requestQuery: IActivateUserQuery = req.query
-//         const data = schemaValidation(ActivateUserQuerySchema, requestQuery)
-//         const response = await authService.activateUserAccount(data, next)
-//         if (response) res.status(200).send(formatResponse(response))
-//     } catch (error) {
-//         next(error)
-//     }
-// }
+export const activateAccount = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { query } = req
+        const response = await authService.activateAccount(query, next)
+        if (response) res.status(200).send(formatResponse(response))
+    } catch (error) {
+        next(error)
+    }
+}
 
 export const login = async (
     req: Request,
@@ -33,23 +32,22 @@ export const login = async (
     }
 }
 
-// export const logout = async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-// ) => {
-//     try {
-//         const headers = req.headers
-//         const currentHeaders = schemaValidation(LogoutHeaderSchema, headers)
-//         const response = await authService.logout(
-//             currentHeaders.refresh_token as string,
-//             next
-//         )
-//         if (response) res.status(200).send(formatResponse(response))
-//     } catch (error) {
-//         next(error)
-//     }
-// }
+export const logout = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const {
+            headers: { refresh_token },
+        } = req
+        const response = await authService.logout(refresh_token as string, next)
+        if (response) res.status(200).send(formatResponse(response))
+    } catch (error) {
+        next(error)
+    }
+}
+
 export const registerUser = async (
     req: Request,
     res: Response,
@@ -64,22 +62,21 @@ export const registerUser = async (
     }
 }
 
-// export const refreshToken = async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-// ) => {
-//     try {
-//         const headers = req.headers
-//         const currentHeader = schemaValidation(ActivateUserQuerySchema, headers)
-//         if (currentHeader) {
-//             const response = await authService.refreshToken(
-//                 currentHeader.token as string,
-//                 next
-//             )
-//             if (response) res.status(200).send(formatResponse(response))
-//         }
-//     } catch (error) {
-//         next(error)
-//     }
-// }
+export const refreshToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const {
+            headers: { refresh_token },
+        } = req
+        const response = await authService.refreshToken(
+            refresh_token as string,
+            next
+        )
+        if (response) res.status(200).send(formatResponse(response))
+    } catch (error) {
+        next(error)
+    }
+}

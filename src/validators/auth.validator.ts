@@ -18,3 +18,11 @@ export const signupSchema = loginSchema
     .refine((data) => data.password === data.confirmPassword, {
         message: "Passwords don't match",
     })
+
+export const refreshTokenSchema = z.object({
+    refresh_token: z.string(),
+})
+
+export const activateAccountQuerySchema = z.object({
+    token: z.string(),
+})

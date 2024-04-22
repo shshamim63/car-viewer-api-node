@@ -10,31 +10,45 @@ import { generateToken, verifyToken } from '../util/jwt'
 import { AppError } from '../util/appError'
 
 import * as MailHelper from '../util/mailer'
+
 import {
+    ActivateAccountQuery,
     AuthenticatedUser,
     LoginRequestBody,
     SignupRequestBody,
+    UserStatus,
 } from '../interfaces/user.interface'
 import { userSerializer } from '../serialization/auth.serializer'
 
-// export const activateUserAccount = async (
-//     query: any,
-//     next: NextFunction
-// ) => {
-//     try {
-//         const decodedUser: any = verifyToken(
-//             query.token,
-//             authConfig.accessTokenSecret
-//         )
-//         const updatedUser = await userDB.findAndUpdateUser(
-//             { _id: decodedUser.id, status: ZodActiveStatusEnum.Enum.Pending },
-//             { status: ZodActiveStatusEnum.Enum.Active }
-//         )
-//         return await userDB.generateAuthenticatedUserInfo(updatedUser)
-//     } catch (error) {
-//         next(error)
-//     }
-// }
+export const activateAccount = async (
+    query: ActivateAccountQuery,
+    next: NextFunction
+) => {
+    try {
+        const decodedUser = verifyToken(
+            query.token,
+            authConfig.accessTokenSecret
+        )
+
+        if (decodedUser.status === UserStatus.Inactive) {
+            const currentUser = await userDB.findOneUser({
+                _id: decodedUser.id,
+            })
+            if (currentUser.status === UserStatus.Active)
+                throw new AppError(
+                    400,
+                    'The user already has an active account'
+                )
+            await userDB.findAndUpdateUser(
+                { _id: decodedUser.id, status: UserStatus.Inactive },
+                { status: UserStatus.Active }
+            )
+            return 'Account activated successfully'
+        }
+    } catch (error) {
+        next(error)
+    }
+}
 
 export const login = async (
     body: LoginRequestBody,
@@ -90,23 +104,18 @@ export const login = async (
     }
 }
 
-// export const logout = async (
-//     token: string,
-//     next: NextFunction
-// ): Promise<string> => {
-//     try {
-//         const decodedUser: IUser = verifyToken(
-//             token,
-//             authConfig.refreshTokenSecret
-//         )
-//         if (decodedUser) {
-//             await userDB.deleteToken({ token: token })
-//             return 'Logout successfull'
-//         }
-//     } catch (error) {
-//         next(error)
-//     }
-// }
+export const logout = async (
+    token: string,
+    next: NextFunction
+): Promise<string> => {
+    try {
+        const deleteStatus = await userDB.removeToken({ token: token })
+        if (!deleteStatus) throw new AppError(401, 'Invalid credentials')
+        return 'Logout successfull'
+    } catch (error) {
+        next(error)
+    }
+}
 
 export const registerUser = async (
     data: SignupRequestBody,
@@ -123,10 +132,10 @@ export const registerUser = async (
         const user = await userDB.createUser(newUser)
 
         const userInfo = userSerializer(user)
-        console.log('Userinfo', userInfo)
         const activationToken = generateToken(
             userInfo,
-            authConfig.accessTokenSecret
+            authConfig.accessTokenSecret,
+            '2d'
         )
 
         const context = {
@@ -146,23 +155,29 @@ export const registerUser = async (
     }
 }
 
-// export const refreshToken = async (token: string, next: NextFunction) => {
-//     try {
-//         const validToken = userDB.findRefreshToken(token)
-//         if (validToken) {
-//             const decodedUser: IUser = verifyToken(
-//                 token,
-//                 authConfig.refreshTokenSecret
-//             )
-//             const currentUser = await userDB.findOneUser({
-//                 _id: decodedUser.id,
-//             })
-//             if (!currentUser) throw new AppError(401, 'Invalid user credential')
+export const refreshToken = async (
+    refresh_token: string,
+    next: NextFunction
+): Promise<AuthenticatedUser> => {
+    try {
+        await userDB.findRefreshToken(refresh_token)
+        const user = verifyToken(refresh_token, authConfig.refreshTokenSecret)
+        const currentUser = await userDB.findOneUser({ _id: user.id })
+        const serializedUser = userSerializer(currentUser)
 
-//             const userInfo = convertToUserResponse(currentUser)
-//             return await userDB.generateAccessInfo(userInfo)
-//         }
-//     } catch (error) {
-//         next(error)
-//     }
-// }
+        const accessToken = generateToken(
+            serializedUser,
+            authConfig.accessTokenSecret,
+            '15m'
+        )
+
+        return {
+            ...serializedUser,
+            refreshToken: refresh_token,
+            accessToken,
+            type: 'Bearer',
+        }
+    } catch (error) {
+        next(error)
+    }
+}
