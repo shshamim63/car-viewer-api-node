@@ -16,8 +16,9 @@ export const createUser = async (data: NewUser): Promise<MongoUser> => {
         const user = await User.create(data)
         return user.toObject()
     } catch (error) {
-        if (error.code === 11000) {
-            throw new AppError(409, `User already exists`, error.keyValue)
+        const { code, keyValue } = error
+        if (code === 11000) {
+            throw new AppError(409, `User already exists`, keyValue)
         } else {
             throw new AppError(500, 'Server error')
         }

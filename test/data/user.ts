@@ -16,7 +16,7 @@ export const generateSignupRequestBody = (): SignupRequestBody => {
         email: faker.internet.email(),
         password,
         avatar: faker.image.avatar(),
-        username: faker.internet.userName(),
+        username: faker.string.alphanumeric(10),
         confirmPassword: password,
     }
 }
@@ -33,7 +33,7 @@ export const createUserSeed = async (): Promise<MongoUser> => {
         _id: new Types.ObjectId(faker.database.mongodbObjectId()),
         role: UserRole.Admin,
         updatedAt: new Date(),
-        username: faker.internet.userName(),
+        username: faker.string.alphanumeric(10),
         passwordHash: passwordHash,
     }
 
@@ -49,6 +49,6 @@ export const tokenPayload = () => {
         id: faker.database.mongodbObjectId(),
         role: UserRole.Admin,
         updatedAt: new Date(),
-        username: faker.internet.userName(),
+        username: faker.string.alphanumeric(10),
     }
 }
