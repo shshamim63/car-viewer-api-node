@@ -1,4 +1,4 @@
-import { tokenPayload } from '../test/data/user'
+import { tokenPayload } from '../test/data/user.data'
 
 const jwt = jest.createMockFromModule('jsonwebtoken')
 

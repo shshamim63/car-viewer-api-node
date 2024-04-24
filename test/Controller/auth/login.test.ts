@@ -1,90 +1,71 @@
-// import request from 'supertest'
-// import { faker } from '@faker-js/faker'
+import bcrypt from 'bcrypt'
+import request from 'supertest'
+import { faker } from '@faker-js/faker'
 
-// import { app } from '../../../src/app'
-// import * as authService from '../../../src/service/auth.service'
-// import * as userDB from '../../../src/dataAccess/userRepository'
-// import { IAuthenticatedUser } from '../../../src/model/user/user.model'
-// import { generateAuthenticatedUserResponse } from '../../data/user'
+import { app } from '../../../src/app'
 
-// describe('Auth/Login', () => {
-//     beforeEach(() => {
-//         jest.clearAllMocks()
-//         jest.resetAllMocks()
-//         jest.restoreAllMocks()
-//     })
+import * as userDB from '../../../src/dataAccess/user.repository'
 
-//     const requestBody = {
-//         email: faker.internet.email(),
-//         password: faker.internet.password(),
-//     }
+import {
+    generateLoginCredentials,
+    invalidSchemaMessage,
+    mongodUser,
+} from '../../data/user.data'
 
-//     const responseUser = generateAuthenticatedUserResponse(requestBody.email)
+describe('Auth/Login', () => {
+    let findUserSpy
+    let bcryptSpy
+    beforeEach(() => {
+        findUserSpy = jest
+            .spyOn(userDB, 'findOneUser')
+            .mockResolvedValue(mongodUser())
+        bcryptSpy = jest.spyOn(bcrypt, 'compare').mockResolvedValue(true)
+    })
+    afterEach(() => {
+        jest.clearAllMocks()
+    })
 
-//     describe('Request body validation', () => {
-//         test('Should throw error when request body does not contain any property', async () => {
-//             const response = await request(app).post('/auth/login')
-//             const reponseObject = JSON.parse(response.text)
-//             expect(reponseObject.message).toEqual('Invalid Schema')
-//             expect(
-//                 reponseObject.description.find((context) =>
-//                     context.path.includes('email')
-//                 )
-//             )
-//             expect(
-//                 reponseObject.description.find((context) =>
-//                     context.path.includes('password')
-//                 )
-//             )
-//             expect(response.status).toEqual(400)
-//         })
-//         test('Should throw error when request body does not contain any property', async () => {
-//             const response = await request(app)
-//                 .post('/auth/login')
-//                 .send({ ...requestBody, email: 'demo@gmailcom' })
-//             const reponseObject = JSON.parse(response.text)
-//             expect(reponseObject.message).toEqual('Invalid Schema')
-//             expect(
-//                 reponseObject.description.find((context) =>
-//                     context.path.includes('email')
-//                 )
-//             )
-//             expect(response.status).toEqual(400)
-//         })
-//         test('Should throw error when request body does not contain any property', async () => {
-//             const response = await request(app)
-//                 .post('/auth/login')
-//                 .send({ ...requestBody, password: '' })
-//             const reponseObject = JSON.parse(response.text)
-//             expect(reponseObject.message).toEqual('Invalid Schema')
-//             expect(
-//                 reponseObject.description.find((context) =>
-//                     context.path.includes('email')
-//                 )
-//             )
-//             expect(response.status).toEqual(400)
-//         })
-//         test('Should not throw error when request body contains the right data', async () => {
-//             jest.spyOn(authService, 'login').mockImplementation(
-//                 () =>
-//                     Promise.resolve(responseUser) as Promise<IAuthenticatedUser>
-//             )
-
-//             const response = await request(app)
-//                 .post('/auth/login')
-//                 .send(requestBody)
-//             expect(response.status).toEqual(200)
-//         })
-//     })
-//     describe('Login flow', () => {
-//         test('Should throw error when user does not exist', async () => {
-//             jest.spyOn(userDB, 'findOneUser').mockImplementation(() => {
-//                 return null
-//             })
-//             const response = await request(app)
-//                 .post('/auth/login')
-//                 .send(requestBody)
-//             expect(response.status).toEqual(404)
-//         })
-//     })
-// })
+    describe('Request body validation', () => {
+        test('Response should have code 400 when email and password is missing', async () => {
+            const response = await request(app).post('/auth/login').send({})
+            const {
+                status,
+                body: { message, description },
+            } = response
+            expect(status).toEqual(400)
+            expect(message).toEqual(invalidSchemaMessage)
+            expect(description.length).toEqual(2)
+        })
+        describe('Validation/email', () => {
+            const loginCredentials = generateLoginCredentials()
+            test('Response should have code 400 when email is invalid', async () => {
+                const response = await request(app)
+                    .post('/auth/login')
+                    .send({
+                        ...loginCredentials,
+                        email: faker.internet.userName(),
+                    })
+                const {
+                    status,
+                    body: { message, description },
+                } = response
+                expect(status).toEqual(400)
+                expect(message).toEqual(invalidSchemaMessage)
+                expect(description[0]).toMatchObject({
+                    validation: expect.any(String),
+                    code: expect.any(String),
+                    message: expect.any(String),
+                    path: expect.any(Array),
+                })
+            })
+            test('Response should have code 400 when email is invalid', async () => {
+                const response = await request(app)
+                    .post('/auth/login')
+                    .send(loginCredentials)
+                const { status, body } = response
+                console.log(body)
+                expect(status).toEqual(200)
+            })
+        })
+    })
+})

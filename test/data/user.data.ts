@@ -10,6 +10,8 @@ import {
 } from '../../src/interfaces/user.interface'
 import { Types } from 'mongoose'
 
+export const invalidSchemaMessage = 'Invalid Schema'
+
 export const generateSignupRequestBody = (): SignupRequestBody => {
     const password = faker.internet.password()
     return {
@@ -21,7 +23,7 @@ export const generateSignupRequestBody = (): SignupRequestBody => {
     }
 }
 
-export const createUserSeed = async (): Promise<MongoUser> => {
+export const mongodUser = async (): Promise<MongoUser> => {
     const password = faker.internet.password({ length: 15 })
     const passwordHash = await bcrypt.hash(password, SALTROUNDS)
 
@@ -50,5 +52,12 @@ export const tokenPayload = () => {
         role: UserRole.Admin,
         updatedAt: new Date(),
         username: faker.string.alphanumeric(10),
+    }
+}
+
+export const generateLoginCredentials = () => {
+    return {
+        email: faker.internet.email(),
+        password: faker.internet.password(),
     }
 }

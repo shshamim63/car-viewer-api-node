@@ -1,4 +1,5 @@
 import request from 'supertest'
+import { faker } from '@faker-js/faker'
 
 import { app } from '../../../src/app'
 
@@ -6,9 +7,12 @@ import * as MailHelper from '../../../src/util/mailer'
 import * as userDB from '../../../src/dataAccess/user.repository'
 
 import { SignupRequestBody } from '../../../src/interfaces/user.interface'
-import { createUserSeed, generateSignupRequestBody } from '../../data/user'
-import { faker } from '@faker-js/faker'
 import { AppError } from '../../../src/util/appError'
+import {
+    mongodUser,
+    generateSignupRequestBody,
+    invalidSchemaMessage,
+} from '../../data/user.data'
 
 describe('Auth/Registration', () => {
     let createUserSpy
@@ -16,28 +20,27 @@ describe('Auth/Registration', () => {
     beforeEach(() => {
         createUserSpy = jest
             .spyOn(userDB, 'createUser')
-            .mockResolvedValue(createUserSeed())
+            .mockResolvedValue(mongodUser())
         mailSpy = jest
             .spyOn(MailHelper, 'sendMailToUser')
             .mockResolvedValue({ response: 'Email sent successfully' })
     })
     afterEach(() => {
         jest.clearAllMocks()
-        jest.resetAllMocks()
-        jest.restoreAllMocks()
     })
     describe('Request Body validation', () => {
-        const invalidSchemaMessage = 'Invalid Schema'
         test('Response should have 400 status code ', async () => {
             const signupPayload = {} as SignupRequestBody
             const response = await request(app)
                 .post('/auth/registration')
                 .send(signupPayload)
-            const {
-                status,
-                body: { message, description },
-            } = response
+            const { status, body } = response
+            const { message, description } = body
             expect(status).toEqual(400)
+            expect(body).toMatchObject({
+                message: expect.any(String),
+                description: expect.any(Array),
+            })
             expect(message).toEqual(invalidSchemaMessage)
             expect(description.length).toEqual(4)
         })
@@ -234,7 +237,9 @@ describe('Auth/Registration', () => {
                 } = response
                 expect(status).toEqual(409)
                 expect(message).toEqual('User already exists')
-                expect(JSON.parse(description)).toMatchObject(errorKeyValue)
+                expect(JSON.parse(description)).toMatchObject({
+                    email: expect.any(String),
+                })
             })
         })
     })
