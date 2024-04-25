@@ -24,6 +24,7 @@ describe('Auth/Login', () => {
             .spyOn(userDB, 'saveRefreshToken')
             .mockImplementation(() => Promise.resolve())
     })
+
     afterEach(() => {
         jest.clearAllMocks()
     })
