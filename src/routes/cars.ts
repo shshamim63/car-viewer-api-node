@@ -1,9 +1,6 @@
 import { Router } from 'express'
 import * as carController from '../controller/car.controller'
-import {
-    authenticate,
-    authorized,
-} from '../middlewares/permission.middleware'
+import { authenticate, authorized } from '../middlewares/permission.middleware'
 
 const router = Router()
 

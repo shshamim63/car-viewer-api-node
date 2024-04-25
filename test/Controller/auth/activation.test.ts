@@ -3,7 +3,7 @@
 // import { faker } from '@faker-js/faker'
 
 // import { app } from '../../../src/app'
-// import * as userDB from '../../../src/dataAccess/userRepository'
+// import * as userDB from '../../../src/repositories/userRepository'
 
 // import { CustomError } from './helper/error'
 // import { User } from '../../../src/model/user.mongo.schema'

@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import { NextFunction } from 'express'
 
-import * as userDB from '../dataAccess/user.repository'
+import * as userDB from '../repositories/user.repository'
 
 import { appConfig, authConfig } from '../config'
 import { SALTROUNDS } from '../const'

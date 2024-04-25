@@ -23,7 +23,7 @@ export const generateSignupRequestBody = (): SignupRequestBody => {
     }
 }
 
-export const mongodUser = async (): Promise<MongoUser> => {
+export const mongodbUser = async (): Promise<MongoUser> => {
     const password = faker.internet.password({ length: 15 })
     const passwordHash = await bcrypt.hash(password, SALTROUNDS)
 

@@ -4,12 +4,12 @@ import { faker } from '@faker-js/faker'
 import { app } from '../../../src/app'
 
 import * as MailHelper from '../../../src/util/mailer'
-import * as userDB from '../../../src/dataAccess/user.repository'
+import * as userDB from '../../../src/repositories/user.repository'
 
 import { SignupRequestBody } from '../../../src/interfaces/user.interface'
 import { AppError } from '../../../src/util/appError'
 import {
-    mongodUser,
+    mongodbUser,
     generateSignupRequestBody,
     invalidSchemaMessage,
 } from '../../data/user.data'
@@ -20,7 +20,7 @@ describe('Auth/Registration', () => {
     beforeEach(() => {
         createUserSpy = jest
             .spyOn(userDB, 'createUser')
-            .mockResolvedValue(mongodUser())
+            .mockResolvedValue(mongodbUser())
         mailSpy = jest
             .spyOn(MailHelper, 'sendMailToUser')
             .mockResolvedValue({ response: 'Email sent successfully' })
