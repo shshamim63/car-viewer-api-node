@@ -3,11 +3,11 @@ import { faker } from '@faker-js/faker'
 
 import { app } from '../../../src/app'
 
-import * as MailHelper from '../../../src/util/mailer'
+import * as MailHelper from '../../../src/utils/mailer'
 import * as userDB from '../../../src/repositories/user.repository'
 
 import { SignupRequestBody } from '../../../src/interfaces/user.interface'
-import { AppError } from '../../../src/util/appError'
+import { AppError } from '../../../src/utils/appError'
 import {
     mongodbUser,
     generateSignupRequestBody,

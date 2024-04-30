@@ -1,7 +1,9 @@
-import { tokenPayload } from '../test/data/user.data'
+interface JwtModule {
+    verify: jest.Mock
+}
 
-const jwt = jest.createMockFromModule('jsonwebtoken')
+const jwt: JwtModule = jest.createMockFromModule('jsonwebtoken')
 
-export const verify = jest.fn().mockReturnValue(tokenPayload)
+jwt.verify = jest.fn()
 
 export default jwt

@@ -30,18 +30,19 @@ describe('Auth/Login', () => {
     })
 
     const loginCredentials = generateLoginCredentials()
-    describe('Request body validation', () => {
-        test('Response should have code 400 when email and password is missing', async () => {
-            const response = await request(app).post('/auth/login').send({})
-            const {
-                status,
-                body: { message, description },
-            } = response
-            expect(status).toEqual(400)
-            expect(message).toEqual(invalidSchemaMessage)
-            expect(description.length).toEqual(2)
-        })
-        describe('Validation/RequestBody', () => {
+
+    describe('Login Testing', () => {
+        describe('Validation of RequestBody', () => {
+            test('Response should have code 400 when email and password is missing', async () => {
+                const response = await request(app).post('/auth/login').send({})
+                const {
+                    status,
+                    body: { message, description },
+                } = response
+                expect(status).toEqual(400)
+                expect(message).toEqual(invalidSchemaMessage)
+                expect(description.length).toEqual(2)
+            })
             test('Response should have code 400 when email is invalid', async () => {
                 const response = await request(app)
                     .post('/auth/login')
@@ -87,7 +88,7 @@ describe('Auth/Login', () => {
                 })
             })
         })
-        describe('Login Flow', () => {
+        describe('Request body contains correct format of value', () => {
             test('Response should have code 404 when user with email does not exist', async () => {
                 findUserSpy.mockResolvedValue(null)
                 const response = await request(app)
@@ -101,7 +102,7 @@ describe('Auth/Login', () => {
                 expect(body.description.includes(loginCredentials.email))
                 expect(status).toEqual(404)
             })
-            test('Response should have code 401 when password is invalid', async () => {
+            test('Response should have code 401 when password is incorrect', async () => {
                 findUserSpy.mockResolvedValue(mongodbUser())
                 bcryptSpy.mockImplementationOnce(() => Promise.resolve(false))
                 const response = await request(app)

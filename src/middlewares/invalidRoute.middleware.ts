@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from 'express'
-import { AppError } from '../util/appError'
+import { AppError } from '../utils/appError'
 
 export const invalidRouteMiddleware = (
     req: Request,

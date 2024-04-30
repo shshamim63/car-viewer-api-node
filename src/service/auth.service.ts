@@ -5,11 +5,11 @@ import * as userDB from '../repositories/user.repository'
 
 import { appConfig, authConfig } from '../config'
 import { SALTROUNDS } from '../const'
-import { generateToken, verifyToken } from '../util/jwt'
+import { generateToken, verifyToken } from '../utils/jwt'
 
-import { AppError } from '../util/appError'
+import { AppError } from '../utils/appError'
 
-import * as MailHelper from '../util/mailer'
+import * as MailHelper from '../utils/mailer'
 
 import {
     ActivateAccountQuery,
@@ -109,8 +109,14 @@ export const logout = async (
     next: NextFunction
 ): Promise<string> => {
     try {
-        const deleteStatus = await userDB.removeToken({ token: token })
-        if (!deleteStatus) throw new AppError(401, 'Invalid credentials')
+        const isTokenValid = verifyToken(token, authConfig.refreshTokenSecret)
+        if (!isTokenValid) throw new AppError(401, 'Invalid credentials')
+        console.log(isTokenValid)
+        const deleteStatus = await userDB.removeToken({
+            userId: isTokenValid.id,
+            token: token,
+        })
+        if (!deleteStatus) throw new AppError(404, 'Token is not whitelisted')
         return 'Logout successfull'
     } catch (error) {
         next(error)

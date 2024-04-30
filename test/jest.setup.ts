@@ -1,7 +1,7 @@
 import mongoose, { ConnectOptions } from 'mongoose'
 import { mongoConfig } from '../src/config'
 
-jest.mock('../src/util/logger', () => ({
+jest.mock('../src/utils/logger', () => ({
     logger: {
         info: jest.fn(),
         error: jest.fn(),

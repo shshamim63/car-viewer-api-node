@@ -1,6 +1,6 @@
 import { appConfig } from './config'
 import { app } from './app'
-import { logger } from './util/logger'
+import { logger } from './utils/logger'
 
 const port = appConfig.port || 3001
 

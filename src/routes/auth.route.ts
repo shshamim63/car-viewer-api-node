@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import * as authController from '../controller/auth.controller'
-import { validation } from '../middlewares/validation.middleware'
+import * as validation from '../middlewares/validation.middleware'
 import {
     loginSchema,
     signupSchema,
@@ -12,24 +12,28 @@ const router = Router()
 
 router.post(
     '/auth/user/activate',
-    validation(activateAccountQuerySchema, 'path'),
+    validation.queryValidation(activateAccountQuerySchema),
     authController.activateAccount
 )
 router.post(
     '/auth/refresh/token',
-    validation(refreshTokenSchema, 'header'),
+    validation.headersValidation(refreshTokenSchema),
     authController.refreshToken
 )
 
-router.post('/auth/login', validation(loginSchema), authController.login)
+router.post(
+    '/auth/login',
+    validation.bodyValidation(loginSchema),
+    authController.login
+)
 router.post(
     '/auth/registration',
-    validation(signupSchema),
+    validation.bodyValidation(signupSchema),
     authController.registerUser
 )
 router.post(
     '/auth/logout',
-    validation(refreshTokenSchema, 'header'),
+    validation.headersValidation(refreshTokenSchema),
     authController.logout
 )
 

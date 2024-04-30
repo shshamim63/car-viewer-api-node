@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 
 import * as carService from '../service/car.service'
-import { formatResponse } from '../util/formatResponse'
+import { formatResponse } from '../utils/formatResponse'
 
 import {
     CarBrandRequestBodySchema,

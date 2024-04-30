@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 
 import { ErrorProperty } from '../model/utils/error'
-import { logger } from '../util/logger'
+import { logger } from '../utils/logger'
 
 interface CustomError extends Error {
     statusCode: number

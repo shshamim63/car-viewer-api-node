@@ -1,5 +1,5 @@
 import { Types } from 'mongoose'
-import { AppError } from '../util/appError'
+import { AppError } from '../utils/appError'
 
 import { RefreshToken, User } from '../model/user.model'
 import {
@@ -60,7 +60,7 @@ export const findAndUpdateUser = async (
 export const findRefreshToken = async (token: string) => {
     try {
         const currentToken = await RefreshToken.findOne({ token: token })
-        if (!currentToken) throw new AppError(401, 'Unauthorized Request')
+        if (!currentToken) throw new AppError(404, 'Token is not whitelisted')
         return currentToken
     } catch (error) {
         if (error instanceof AppError) throw error

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 
-import { formatResponse } from '../util/formatResponse'
+import { formatResponse } from '../utils/formatResponse'
 
 import * as authService from '../service/auth.service'
 

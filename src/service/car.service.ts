@@ -1,5 +1,5 @@
 import { ICarBrandRequestBody, ICarRequestBody } from '../model/car/cars.model'
-import { AppError } from '../util/appError'
+import { AppError } from '../utils/appError'
 
 import * as carDB from '../repositories/carRepository'
 
