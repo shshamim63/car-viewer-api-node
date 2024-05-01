@@ -38,11 +38,14 @@ export interface UserUpdateAbleFields {
     status: UserStatus.Active | UserStatus.Inactive
 }
 
-interface UserData extends UserUpdateAbleFields {
-    email: string
-    username: string
+interface MongoTimeStamp {
     createdAt: Date
     updatedAt: Date
+}
+
+interface UserData extends UserUpdateAbleFields, MongoTimeStamp {
+    email: string
+    username: string
 }
 
 export interface MongoUser extends UserData {
@@ -63,4 +66,10 @@ export interface AuthenticatedUser extends User {
     accessToken: string
     refreshToken: string
     type: 'Bearer'
+}
+
+export interface MongoRefreshToken extends MongoTimeStamp {
+    _id: Types.ObjectId
+    userId: Types.ObjectId
+    token: string
 }

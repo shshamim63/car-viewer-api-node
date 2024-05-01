@@ -60,10 +60,9 @@ export const findAndUpdateUser = async (
 export const findRefreshToken = async (token: string) => {
     try {
         const currentToken = await RefreshToken.findOne({ token: token })
-        if (!currentToken) throw new AppError(404, 'Token is not whitelisted')
-        return currentToken
+        if (!currentToken) return null
+        return currentToken.toObject()
     } catch (error) {
-        if (error instanceof AppError) throw error
         throw new AppError(500, 'Server error')
     }
 }

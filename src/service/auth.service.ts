@@ -110,13 +110,16 @@ export const logout = async (
 ): Promise<string> => {
     try {
         const isTokenValid = verifyToken(token, authConfig.refreshTokenSecret)
+
         if (!isTokenValid) throw new AppError(401, 'Invalid credentials')
-        console.log(isTokenValid)
+
         const deleteStatus = await userDB.removeToken({
             userId: isTokenValid.id,
             token: token,
         })
+
         if (!deleteStatus) throw new AppError(404, 'Token is not whitelisted')
+
         return 'Logout successfull'
     } catch (error) {
         next(error)
@@ -166,11 +169,16 @@ export const refreshToken = async (
     next: NextFunction
 ): Promise<AuthenticatedUser> => {
     try {
-        await userDB.findRefreshToken(refresh_token)
+        const currentToken = await userDB.findRefreshToken(refresh_token)
+
+        if (!currentToken) throw new AppError(403, 'Token is not whitelisted')
+
         const user = verifyToken(refresh_token, authConfig.refreshTokenSecret)
         const currentUser = await userDB.findOneUser({ _id: user.id })
-        const serializedUser = userSerializer(currentUser)
 
+        if (!currentUser) throw new AppError(404, 'Sorry, user does not exist')
+
+        const serializedUser = userSerializer(currentUser)
         const accessToken = generateToken(
             serializedUser,
             authConfig.accessTokenSecret,

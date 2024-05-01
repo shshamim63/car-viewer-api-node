@@ -3,12 +3,14 @@ import { faker } from '@faker-js/faker'
 
 import { SALTROUNDS } from '../../src/const'
 import {
+    MongoRefreshToken,
     MongoUser,
     SignupRequestBody,
     UserRole,
     UserStatus,
 } from '../../src/interfaces/user.interface'
 import { Types } from 'mongoose'
+import { string } from 'zod'
 
 export const invalidSchemaMessage = 'Invalid Schema'
 
@@ -40,6 +42,17 @@ export const mongodbUser = async (): Promise<MongoUser> => {
     }
 
     return userSeed
+}
+
+export const mongoRefreshToken = (token) => {
+    const refreshTokenSeed: MongoRefreshToken = {
+        _id: new Types.ObjectId(faker.database.mongodbObjectId()),
+        userId: new Types.ObjectId(faker.database.mongodbObjectId()),
+        token: token,
+        createdAt: faker.date.past(),
+        updatedAt: faker.date.recent(),
+    }
+    return refreshTokenSeed
 }
 
 export const tokenPayload = () => {
