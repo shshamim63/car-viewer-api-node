@@ -18,8 +18,10 @@ export const generateToken = (
 export const verifyToken = (token: string, secret: string): TokenPayload => {
     try {
         const user = jwt.verify(token, secret)
+        if (!user) throw new AppError(401, 'Invalid authorization error')
         return user as TokenPayload
     } catch (error) {
-        throw new AppError(401, 'Invalid authorization error')
+        if (error instanceof AppError) throw error
+        throw new AppError(500, 'Server Error')
     }
 }

@@ -1,65 +1,45 @@
-// import jwt from 'jsonwebtoken'
-// import request from 'supertest'
-// import { faker } from '@faker-js/faker'
+import jwt from 'jsonwebtoken'
+import request from 'supertest'
+import { faker } from '@faker-js/faker'
 
-// import { app } from '../../../src/app'
-// import * as userDB from '../../../src/repositories/userRepository'
+import { app } from '../../../src/app'
+import * as userDB from '../../../src/repositories/user.repository'
 
-// import { CustomError } from './helper/error'
-// import { User } from '../../../src/model/user.mongo.schema'
-
-// jest.mock('jsonwebtoken', () => ({
-//     verify: jest.fn(),
-// }))
-
-// describe('Auth/User/Activation', () => {
-//     afterEach(() => {
-//         jest.clearAllMocks()
-//         jest.resetAllMocks()
-//         jest.restoreAllMocks()
-//     })
-
-//     describe('Request Query validation', () => {
-//         test('Should throw error when token property is not given', async () => {
-//             const data = await request(app).post('/auth/user/activate')
-//             expect(JSON.parse(data.text).message).toEqual('Invalid Schema')
-//             expect(data.status).toEqual(400)
-//         })
-//         test('Should throw error when token is invalid', async () => {
-//             jest.spyOn(jwt, 'verify').mockImplementationOnce(() => {
-//                 throw new CustomError('invalid signature ', 401)
-//             })
-//             const data = await request(app).post(
-//                 `/auth/user/activate?token=${faker.string.hexadecimal({
-//                     length: 64,
-//                 })}`
-//             )
-//             expect(JSON.parse(data.text).message).toEqual(
-//                 'Invalid authorization error'
-//             )
-//         })
-
-//         test('Should not throw error when data is valid', async () => {
-//             const user = {
-//                 username: 'demouser',
-//                 email: 'demo@gmail.com',
-//             }
-
-//             ;(jwt.verify as jest.Mock).mockReturnValueOnce(User)
-
-//             jest.spyOn(userDB, 'findAndUpdateUser').mockResolvedValue(user)
-//             jest.spyOn(
-//                 userDB,
-//                 'generateAuthenticatedUserInfo'
-//             ).mockResolvedValue(user)
-//             const data = await request(app).post(
-//                 `/auth/user/activate?token=${faker.string.hexadecimal({
-//                     length: 64,
-//                 })}`
-//             )
-//             const responseText = JSON.parse(data.text)
-//             expect(responseText.data.username).toEqual(user.username)
-//             expect(responseText.data.email).toEqual(user.email)
-//         })
-//     })
-// })
+describe('Tests for User Activation', () => {
+    afterEach(() => {
+        jest.clearAllMocks()
+    })
+    const invalidToken = faker.string.hexadecimal({ length: 64 })
+    const validToken = faker.string.hexadecimal({ length: 64 })
+    describe('Request validation', () => {
+        test('Response should have 400 status code when token is misssing', async () => {
+            const response = await request(app).post('/auth/user/activate')
+            const {
+                status,
+                body: { message, description },
+            } = response
+            expect(status).toEqual(status)
+            expect(typeof message).toBe('string')
+            expect(description[0]).toMatchObject({
+                code: expect.any(String),
+                expected: expect.any(String),
+                received: expect.any(String),
+                path: expect.any(Array),
+                message: expect.any(String),
+            })
+        })
+    })
+    describe('Activation flow confirm', () => {
+        test('Response should have 401 status code when token is invalid', async () => {
+            const response = await request(app).post(
+                `/auth/user/activate?token=${invalidToken}`
+            )
+            const {
+                status,
+                body: { message },
+            } = response
+            expect(status).toEqual(401)
+            expect(typeof message).toBe('string')
+        })
+    })
+})

@@ -29,14 +29,13 @@ export const activateAccount = async (
             query.token,
             authConfig.accessTokenSecret
         )
-
         if (decodedUser.status === UserStatus.Inactive) {
             const currentUser = await userDB.findOneUser({
                 _id: decodedUser.id,
             })
             if (currentUser.status === UserStatus.Active)
                 throw new AppError(
-                    400,
+                    403,
                     'The user already has an active account'
                 )
             await userDB.findAndUpdateUser(
@@ -44,6 +43,8 @@ export const activateAccount = async (
                 { status: UserStatus.Active }
             )
             return 'Account activated successfully'
+        } else {
+            throw new AppError(403, 'The user already has an active account')
         }
     } catch (error) {
         next(error)

@@ -46,7 +46,7 @@ describe('Logout testing', () => {
         })
     })
     describe('Logout flow', () => {
-        test('Response should contain status 401 when token is valid but is not present in the database', async () => {
+        test('Response should contain status 401 when token is valid but is absent in the database', async () => {
             (jwt.verify as jest.Mock).mockReturnValue(tokenPayload)
             const refreshToken = faker.string.hexadecimal({ length: 64 })
             const deleteToken = jest
