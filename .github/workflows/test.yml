@@ -1,0 +1,44 @@
+name: Run Tests
+
+on:
+    pull_request:
+        branches:
+            - main
+            - staging
+    push:
+        branches:
+            - main
+permissions: read-all
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        services:
+            mongodb:
+                image: mongo
+                ports:
+                    - 27017:27017
+                options: --name mongodb
+
+        env:
+            NODE_ENV: testing
+            MONGO_URI: mongodb://localhost:27017/logistic
+            ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+            REFRESH_TOKEN_SECRET: ${{ secrets. REFRESH_TOKEN_SECRET }}
+            GAMIL_USER: ${{ secrets.GAMIL_USER }}
+            GMAIL_PASSWORD: ${{secrets.GMAIL_PASSWORD }}
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20.x
+
+            - name: Install Dependencies
+              run: npm install
+
+            - name: Run Tests
+              run: npm run test:remote

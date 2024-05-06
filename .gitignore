@@ -1,2 +1,7 @@
 /node_modules
+dist/
+/data
 .env
+.nx/
+gcp_key.json
+package-lock.json

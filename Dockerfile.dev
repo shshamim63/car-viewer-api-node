@@ -1,0 +1,12 @@
+FROM alpine:3.18
+RUN adduser -D myuser
+RUN apk add --no-cache nodejs npm
+WORKDIR /app
+COPY package.json ./
+RUN npm install
+COPY . .
+COPY swagger/staging.yaml /app/swagger/staging.yaml
+HEALTHCHECK --interval=180s --timeout=4s CMD curl -f https://localhost/ || exit 1
+EXPOSE 3000
+USER myuser
+CMD [ "npm", "run", "dev" ]
