@@ -50,7 +50,7 @@ export const findAndUpdateUser = async (
             new: true,
         })
         if (!response) throw new AppError(404, "User doesn't exist")
-        return response
+        return response.toObject()
     } catch (error) {
         if (error instanceof AppError) throw error
         throw new AppError(500, 'Server error')

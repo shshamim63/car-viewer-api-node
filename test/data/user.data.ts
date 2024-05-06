@@ -10,7 +10,6 @@ import {
     UserStatus,
 } from '../../src/interfaces/user.interface'
 import { Types } from 'mongoose'
-import { string } from 'zod'
 
 export const invalidSchemaMessage = 'Invalid Schema'
 

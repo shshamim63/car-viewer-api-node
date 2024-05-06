@@ -45,7 +45,7 @@ describe('Tests for User Activation', () => {
             expect(typeof message).toBe('string')
         })
         test('Response should have 403 status code when decoded user has activated status', async () => {
-            const mongoUser = mongodbUser()
+            const mongoUser = await mongodbUser()
             ;(jwt.verify as jest.Mock).mockReturnValue({
                 ...mongoUser,
                 status: UserStatus.Active,
@@ -60,6 +60,51 @@ describe('Tests for User Activation', () => {
             expect(status).toEqual(403)
             expect(message).toEqual(alreadyActiveMessageContext)
             expect(typeof message).toBe('string')
+        })
+        test('Response should have 403 status code when current user has activated status', async () => {
+            const mongoUser = await mongodbUser()
+            const findUserSpy = jest
+                .spyOn(userDB, 'findOneUser')
+                .mockImplementationOnce(() =>
+                    Promise.resolve({ ...mongoUser, status: UserStatus.Active })
+                )
+            ;(jwt.verify as jest.Mock).mockReturnValue(mongoUser)
+            const response = await request(app).post(
+                `/auth/user/activate?token=${validToken}`
+            )
+            const {
+                status,
+                body: { message },
+            } = response
+            expect(findUserSpy).toHaveBeenCalled()
+            expect(status).toBe(403)
+            expect(typeof message).toBe('string')
+        })
+        test('Response should have status 200 when token is valid and user is inavtive', async () => {
+            const mongoUser = await mongodbUser()
+            const findUserSpy = jest
+                .spyOn(userDB, 'findOneUser')
+                .mockImplementationOnce(() =>
+                    Promise.resolve({
+                        ...mongoUser,
+                        status: UserStatus.Inactive,
+                    })
+                )
+            const findAndUpdateUserSpy = jest
+                .spyOn(userDB, 'findAndUpdateUser')
+                .mockImplementationOnce(() => Promise.resolve(mongoUser))
+            ;(jwt.verify as jest.Mock).mockReturnValue(mongoUser)
+            const response = await request(app).post(
+                `/auth/user/activate?token=${validToken}`
+            )
+            const {
+                status,
+                body: { data },
+            } = response
+            expect(findUserSpy).toHaveBeenCalled()
+            expect(findAndUpdateUserSpy).toHaveBeenCalled()
+            expect(status).toBe(200)
+            expect(typeof data).toBe('string')
         })
     })
 })
