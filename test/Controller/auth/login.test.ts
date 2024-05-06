@@ -1,118 +1,145 @@
-import mongoose, { ConnectOptions } from 'mongoose'
+import bcrypt from 'bcrypt'
 import request from 'supertest'
 import { faker } from '@faker-js/faker'
 
-import { mongoConfig } from '../../../src/config'
 import { app } from '../../../src/app'
-import * as authService from '../../../src/service/auth.service'
-import * as userDB from '../../../src/dataAccess/user.db'
-import { IAuthenticatedUser } from '../../../src/model/user/user.model'
+
+import * as userDB from '../../../src/repositories/user.repository'
+
+import {
+    generateLoginCredentials,
+    invalidSchemaMessage,
+    mongodbUser,
+} from '../../data/user.data'
 
 describe('Auth/Login', () => {
-    beforeAll(async () => {
-        await mongoose.connect(mongoConfig.mongoURL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        } as ConnectOptions)
-    })
-
-    afterAll(async () => {
-        await mongoose.connection.close()
-    })
+    let findUserSpy
+    let bcryptSpy
+    let saveRefreshTokenSpy
 
     beforeEach(() => {
+        findUserSpy = jest.spyOn(userDB, 'findOneUser')
+        bcryptSpy = jest.spyOn(bcrypt, 'compare')
+        saveRefreshTokenSpy = jest
+            .spyOn(userDB, 'saveRefreshToken')
+            .mockImplementation(() => Promise.resolve())
+    })
+
+    afterEach(() => {
         jest.clearAllMocks()
-        jest.resetAllMocks()
-        jest.restoreAllMocks()
     })
 
-    const requestBody = {
-        email: faker.internet.email(),
-        password: faker.internet.password(),
-    }
+    const loginCredentials = generateLoginCredentials()
 
-    const responseUser = {
-        email: requestBody.email,
-        status: 'Pending',
-        avatar: faker.image.avatar(),
-        createdAt: new Date(),
-        id: faker.database.mongodbObjectId(),
-        profileId: faker.database.mongodbObjectId(),
-        role: 'user',
-        updatedAt: new Date(),
-        username: faker.internet.userName(),
-        accessToken: faker.string.hexadecimal({
-            length: 64,
-        }),
-        refreshToken: faker.string.hexadecimal({
-            length: 64,
-        }),
-        authorizationType: 'Bearer',
-    }
-    describe('Request body validation', () => {
-        test('Should throw error when request body does not contain any property', async () => {
-            const response = await request(app).post('/auth/login')
-            const reponseObject = JSON.parse(response.text)
-            expect(reponseObject.message).toEqual('Invalid Schema')
-            expect(
-                reponseObject.description.find((context) =>
-                    context.path.includes('email')
-                )
-            )
-            expect(
-                reponseObject.description.find((context) =>
-                    context.path.includes('password')
-                )
-            )
-            expect(response.status).toEqual(400)
-        })
-        test('Should throw error when request body does not contain any property', async () => {
-            const response = await request(app)
-                .post('/auth/login')
-                .send({ ...requestBody, email: 'demo@gmailcom' })
-            const reponseObject = JSON.parse(response.text)
-            expect(reponseObject.message).toEqual('Invalid Schema')
-            expect(
-                reponseObject.description.find((context) =>
-                    context.path.includes('email')
-                )
-            )
-            expect(response.status).toEqual(400)
-        })
-        test('Should throw error when request body does not contain any property', async () => {
-            const response = await request(app)
-                .post('/auth/login')
-                .send({ ...requestBody, password: '' })
-            const reponseObject = JSON.parse(response.text)
-            expect(reponseObject.message).toEqual('Invalid Schema')
-            expect(
-                reponseObject.description.find((context) =>
-                    context.path.includes('email')
-                )
-            )
-            expect(response.status).toEqual(400)
-        })
-        test('Should not throw error when request body contains the right data', async () => {
-            jest.spyOn(authService, 'login').mockImplementation(
-                () =>
-                    Promise.resolve(responseUser) as Promise<IAuthenticatedUser>
-            )
-
-            const response = await request(app)
-                .post('/auth/login')
-                .send(requestBody)
-            expect(response.status).toEqual(200)
-        })
-    })
-    describe('Login flow', () => {
-        test('Should throw error when user does not exist', async () => {
-            jest.spyOn(userDB, 'findOneUser').mockImplementation(() => {
-                return null
+    describe('Login Testing', () => {
+        describe('Validation of RequestBody', () => {
+            test('Response should have code 400 when email and password is missing', async () => {
+                const response = await request(app).post('/auth/login').send({})
+                const {
+                    status,
+                    body: { message, description },
+                } = response
+                expect(status).toEqual(400)
+                expect(message).toEqual(invalidSchemaMessage)
+                expect(description.length).toEqual(2)
             })
-            const response = await request(app)
-                .post('/auth/login')
-                .send(requestBody)
-            expect(response.status).toEqual(404)
+            test('Response should have code 400 when email is invalid', async () => {
+                const response = await request(app)
+                    .post('/auth/login')
+                    .send({
+                        ...loginCredentials,
+                        email: faker.internet.userName(),
+                    })
+                const {
+                    status,
+                    body: { message, description },
+                } = response
+                expect(status).toEqual(400)
+                expect(message).toEqual(invalidSchemaMessage)
+                expect(description[0]).toMatchObject({
+                    validation: expect.any(String),
+                    code: expect.any(String),
+                    message: expect.any(String),
+                    path: expect.any(Array),
+                })
+            })
+            test('Response should have code 400 when password has less than 8 characters', async () => {
+                const response = await request(app)
+                    .post('/auth/login')
+                    .send({
+                        ...loginCredentials,
+                        password: faker.string.alpha({ length: 6 }),
+                    })
+                const { status, body } = response
+                const { description } = body
+                expect(status).toEqual(400)
+                expect(body).toMatchObject({
+                    message: expect.any(String),
+                    description: expect.any(Array),
+                })
+                expect(description[0]).toMatchObject({
+                    code: expect.any(String),
+                    minimum: expect.any(Number),
+                    type: expect.any(String),
+                    inclusive: expect.any(Boolean),
+                    exact: expect.any(Boolean),
+                    message: expect.any(String),
+                    path: expect.any(Array),
+                })
+            })
+        })
+        describe('Request body contains correct format of value', () => {
+            test('Response should have code 404 when user with email does not exist', async () => {
+                findUserSpy.mockResolvedValue(null)
+                const response = await request(app)
+                    .post('/auth/login')
+                    .send(loginCredentials)
+                const { status, body } = response
+                expect(body).toMatchObject({
+                    message: expect.any(String),
+                    description: expect.any(String),
+                })
+                expect(body.description.includes(loginCredentials.email))
+                expect(status).toEqual(404)
+            })
+            test('Response should have code 401 when password is incorrect', async () => {
+                findUserSpy.mockResolvedValue(mongodbUser())
+                bcryptSpy.mockImplementationOnce(() => Promise.resolve(false))
+                const response = await request(app)
+                    .post('/auth/login')
+                    .send(loginCredentials)
+                const { status, body } = response
+                expect(status).toEqual(401)
+                expect(body).toMatchObject({
+                    message: expect.any(String),
+                    description: expect.any(String),
+                })
+            })
+            test('Response should have code 200 when valid credential has been provided', async () => {
+                findUserSpy.mockResolvedValue(mongodbUser())
+                bcryptSpy.mockImplementationOnce(() => Promise.resolve(true))
+
+                const response = await request(app)
+                    .post('/auth/login')
+                    .send(loginCredentials)
+                const {
+                    status,
+                    body: { data },
+                } = response
+                expect(data).toMatchObject({
+                    avatar: expect.any(String),
+                    createdAt: expect.any(String),
+                    email: expect.any(String),
+                    id: expect.any(String),
+                    role: expect.any(String),
+                    status: expect.any(String),
+                    updatedAt: expect.any(String),
+                    username: expect.any(String),
+                    type: expect.any(String),
+                })
+                expect(saveRefreshTokenSpy).toHaveBeenCalled()
+                expect(status).toEqual(200)
+            })
         })
     })
 })

@@ -1,78 +1,110 @@
 import jwt from 'jsonwebtoken'
-import mongoose, { ConnectOptions } from 'mongoose'
 import request from 'supertest'
 import { faker } from '@faker-js/faker'
 
 import { app } from '../../../src/app'
-import * as userDB from '../../../src/dataAccess/user.db'
+import * as userDB from '../../../src/repositories/user.repository'
+import { mongodbUser } from '../../data/user.data'
+import { UserStatus } from '../../../src/interfaces/user.interface'
 
-import { mongoConfig } from '../../../src/config'
-import { CustomError } from './helper/error'
-import { User } from '../../../src/model/user/user.mongo.schema'
-
-jest.mock('jsonwebtoken', () => ({
-    verify: jest.fn(),
-}))
-
-describe('Auth/User/Activation', () => {
-    beforeAll(async () => {
-        await mongoose.connect(mongoConfig.mongoURL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        } as ConnectOptions)
-    })
-
-    afterAll(async () => {
-        await mongoose.connection.close()
-    })
-
+describe('Tests for User Activation', () => {
     afterEach(() => {
         jest.clearAllMocks()
-        jest.resetAllMocks()
-        jest.restoreAllMocks()
     })
-
-    describe('Request Query validation', () => {
-        test('Should throw error when token property is not given', async () => {
-            const data = await request(app).post('/auth/user/activate')
-            expect(JSON.parse(data.text).message).toEqual('Invalid Schema')
-            expect(data.status).toEqual(400)
-        })
-        test('Should throw error when token is invalid', async () => {
-            jest.spyOn(jwt, 'verify').mockImplementationOnce(() => {
-                throw new CustomError('invalid signature ', 401)
+    const invalidToken = faker.string.hexadecimal({ length: 64 })
+    const validToken = faker.string.hexadecimal({ length: 64 })
+    const alreadyActiveMessageContext = 'The user already has an active account'
+    describe('Request validation', () => {
+        test('Response should have 400 status code when token is misssing', async () => {
+            const response = await request(app).post('/auth/user/activate')
+            const {
+                status,
+                body: { message, description },
+            } = response
+            expect(status).toEqual(status)
+            expect(typeof message).toBe('string')
+            expect(description[0]).toMatchObject({
+                code: expect.any(String),
+                expected: expect.any(String),
+                received: expect.any(String),
+                path: expect.any(Array),
+                message: expect.any(String),
             })
-            const data = await request(app).post(
-                `/auth/user/activate?token=${faker.string.hexadecimal({
-                    length: 64,
-                })}`
-            )
-            expect(JSON.parse(data.text).message).toEqual(
-                'Invalid authorization error'
-            )
         })
-
-        test('Should not throw error when data is valid', async () => {
-            const user = {
-                username: 'demouser',
-                email: 'demo@gmail.com',
-            }
-
-            ;(jwt.verify as jest.Mock).mockReturnValueOnce(User)
-
-            jest.spyOn(userDB, 'findAndUpdateUser').mockResolvedValue(user)
-            jest.spyOn(
-                userDB,
-                'generateAuthenticatedUserInfo'
-            ).mockResolvedValue(user)
-            const data = await request(app).post(
-                `/auth/user/activate?token=${faker.string.hexadecimal({
-                    length: 64,
-                })}`
+    })
+    describe('Activation flow confirm', () => {
+        test('Response should have 401 status code when token is invalid', async () => {
+            const response = await request(app).post(
+                `/auth/user/activate?token=${invalidToken}`
             )
-            const responseText = JSON.parse(data.text)
-            expect(responseText.data.username).toEqual(user.username)
-            expect(responseText.data.email).toEqual(user.email)
+            const {
+                status,
+                body: { message },
+            } = response
+            expect(status).toEqual(401)
+            expect(typeof message).toBe('string')
+        })
+        test('Response should have 403 status code when decoded user has activated status', async () => {
+            const mongoUser = await mongodbUser()
+            ;(jwt.verify as jest.Mock).mockReturnValue({
+                ...mongoUser,
+                status: UserStatus.Active,
+            })
+            const response = await request(app).post(
+                `/auth/user/activate?token=${validToken}`
+            )
+            const {
+                status,
+                body: { message },
+            } = response
+            expect(status).toEqual(403)
+            expect(message).toEqual(alreadyActiveMessageContext)
+            expect(typeof message).toBe('string')
+        })
+        test('Response should have 403 status code when current user has activated status', async () => {
+            const mongoUser = await mongodbUser()
+            const findUserSpy = jest
+                .spyOn(userDB, 'findOneUser')
+                .mockImplementationOnce(() =>
+                    Promise.resolve({ ...mongoUser, status: UserStatus.Active })
+                )
+            ;(jwt.verify as jest.Mock).mockReturnValue(mongoUser)
+            const response = await request(app).post(
+                `/auth/user/activate?token=${validToken}`
+            )
+            const {
+                status,
+                body: { message },
+            } = response
+            expect(findUserSpy).toHaveBeenCalled()
+            expect(status).toBe(403)
+            expect(typeof message).toBe('string')
+        })
+        test('Response should have status 200 when token is valid and user is inavtive', async () => {
+            const mongoUser = await mongodbUser()
+            const findUserSpy = jest
+                .spyOn(userDB, 'findOneUser')
+                .mockImplementationOnce(() =>
+                    Promise.resolve({
+                        ...mongoUser,
+                        status: UserStatus.Inactive,
+                    })
+                )
+            const findAndUpdateUserSpy = jest
+                .spyOn(userDB, 'findAndUpdateUser')
+                .mockImplementationOnce(() => Promise.resolve(mongoUser))
+            ;(jwt.verify as jest.Mock).mockReturnValue(mongoUser)
+            const response = await request(app).post(
+                `/auth/user/activate?token=${validToken}`
+            )
+            const {
+                status,
+                body: { data },
+            } = response
+            expect(findUserSpy).toHaveBeenCalled()
+            expect(findAndUpdateUserSpy).toHaveBeenCalled()
+            expect(status).toBe(200)
+            expect(typeof data).toBe('string')
         })
     })
 })

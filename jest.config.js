@@ -6,4 +6,8 @@ module.exports = {
     verbose: true,
     forceExit: true,
     clearMocks: true,
+    setupFilesAfterEnv: ['./test/jest.setup.ts'],
+    moduleNameMapper: {
+        '^jsonwebtoken$': '<rootDir>/__mocks__/jsonwebtoken.ts',
+    },
 }

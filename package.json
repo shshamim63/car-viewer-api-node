@@ -53,8 +53,11 @@
         "mongoose": "^7.0.3",
         "nodemailer": "^6.9.11",
         "nodemailer-express-handlebars": "^6.1.2",
+        "prom-client": "^15.1.1",
+        "response-time": "^2.3.2",
         "swagger-ui-express": "^4.6.2",
-        "winston": "^3.8.2",
+        "winston": "^3.13.0",
+        "winston-loki": "^6.0.8",
         "yamljs": "^0.3.0",
         "zod": "^3.21.4"
     },

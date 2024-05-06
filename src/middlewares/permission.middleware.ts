@@ -1,6 +1,6 @@
 import { NextFunction, Response } from 'express'
-import { AppError } from '../util/appError'
-import { verifyToken } from '../util/jwt'
+import { AppError } from '../utils/appError'
+import { verifyToken } from '../utils/jwt'
 import { authConfig } from '../config'
 import { CustomRequest } from '../types/express'
 

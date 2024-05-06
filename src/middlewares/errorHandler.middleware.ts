@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 
 import { ErrorProperty } from '../model/utils/error'
+import { logger } from '../utils/logger'
 
 interface CustomError extends Error {
     statusCode: number
@@ -18,6 +19,6 @@ export const errorHandlerMiddleware = (
         ...(err.description && { description: err.description }),
     }
     const statusCode = err.statusCode ? err.statusCode : 500
-
+    logger.error(err.message)
     res.status(statusCode).send(errorResponse)
 }

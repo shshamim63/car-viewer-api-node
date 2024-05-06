@@ -1,9 +1,11 @@
 import { NextFunction, Response, Request } from 'express'
+import { AppError } from '../utils/appError'
 
 export const invalidRouteMiddleware = (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    next({ statusCode: 500, message: 'Invalid URL' })
+    const invalidRouteError = new AppError(500, 'Invalid URL')
+    next(invalidRouteError)
 }

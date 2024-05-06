@@ -1,30 +1,17 @@
 import { NextFunction, Request, Response } from 'express'
 
-import { schemaValidation } from '../util/schemaValidation'
-import { formatResponse } from '../util/formatResponse'
+import { formatResponse } from '../utils/formatResponse'
 
 import * as authService from '../service/auth.service'
 
-import {
-    ActivateUserQuerySchema,
-    LoginBodySchema,
-    RegistrationBodySchema,
-} from '../model/user/user.schema'
-import {
-    IActivateUserQuery,
-    ILoginBody,
-    IRegistrationBody,
-} from '../model/user/user.model'
-
-export const activateUserAccount = async (
+export const activateAccount = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        const requestQuery: IActivateUserQuery = req.query
-        const data = schemaValidation(ActivateUserQuerySchema, requestQuery)
-        const response = await authService.activateUserAccount(data, next)
+        const { query } = req
+        const response = await authService.activateAccount(query, next)
         if (response) res.status(200).send(formatResponse(response))
     } catch (error) {
         next(error)
@@ -37,9 +24,24 @@ export const login = async (
     next: NextFunction
 ) => {
     try {
-        const requestBody: ILoginBody = req.body
-        const body = schemaValidation(LoginBodySchema, requestBody)
-        const response = await authService.login(body, next)
+        const { body: requestBody } = req
+        const response = await authService.login(requestBody, next)
+        if (response) res.status(200).send(formatResponse(response))
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const logout = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const {
+            headers: { refresh_token },
+        } = req
+        const response = await authService.logout(refresh_token as string, next)
         if (response) res.status(200).send(formatResponse(response))
     } catch (error) {
         next(error)
@@ -51,13 +53,10 @@ export const registerUser = async (
     res: Response,
     next: NextFunction
 ) => {
-    const requestBody: IRegistrationBody = req.body
+    const { body: requestBody } = req
     try {
-        const body = schemaValidation(RegistrationBodySchema, requestBody)
-        if (body) {
-            const response = await authService.registerUser(body, next)
-            if (response) res.status(201).send(formatResponse(response))
-        }
+        const response = await authService.registerUser(requestBody, next)
+        if (response) res.status(201).send(formatResponse(response))
     } catch (error) {
         next(error)
     }
@@ -69,15 +68,14 @@ export const refreshToken = async (
     next: NextFunction
 ) => {
     try {
-        const headers = req.headers
-        const currentHeader = schemaValidation(ActivateUserQuerySchema, headers)
-        if (currentHeader) {
-            const response = await authService.refreshToken(
-                currentHeader.token as string,
-                next
-            )
-            if (response) res.status(200).send(formatResponse(response))
-        }
+        const {
+            headers: { refresh_token },
+        } = req
+        const response = await authService.refreshToken(
+            refresh_token as string,
+            next
+        )
+        if (response) res.status(200).send(formatResponse(response))
     } catch (error) {
         next(error)
     }

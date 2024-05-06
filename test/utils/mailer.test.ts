@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer'
-import { sendMailToUser } from '../../src/util/mailer'
+import { sendMailToUser } from '../../src/utils/mailer'
 
 jest.mock('nodemailer', () => ({
     createTransport: jest.fn().mockReturnValue({
@@ -10,8 +10,8 @@ jest.mock('nodemailer', () => ({
     }),
 }))
 
-describe('sendMailToUser function', () => {
-    it('should send an email successfully', async () => {
+describe('sendMailToUser()', () => {
+    it('Function should send an object containing successfull message', async () => {
         const email = 'test@example.com'
         const context = {
             name: 'John Doe',
@@ -19,7 +19,9 @@ describe('sendMailToUser function', () => {
         }
 
         const result = await sendMailToUser({ email, context })
-        expect(result).toBeTruthy()
+        expect(result).toMatchObject({
+            message: expect.any(String),
+        })
         expect(nodemailer.createTransport().sendMail).toHaveBeenCalledTimes(1)
     })
 })

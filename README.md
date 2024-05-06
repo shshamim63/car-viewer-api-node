@@ -50,4 +50,5 @@
     -   To access the mongodb run the following command in the new terminal <br/>
         ```shell
         docker exec -it mongodb mongosh -u <username> -p <password> --authenticationDatabase admin
-    - To access the API documentation go to [https://localhost:3000/docs](https://localhost:3000/docs) on your browser
+        ```
+    -   To access the API documentation go to [https://localhost:3000/docs](https://localhost:3000/docs) on your browser

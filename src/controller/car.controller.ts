@@ -1,9 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 
-import { schemaValidation } from '../util/schemaValidation'
-
 import * as carService from '../service/car.service'
-import { formatResponse } from '../util/formatResponse'
+import { formatResponse } from '../utils/formatResponse'
 
 import {
     CarBrandRequestBodySchema,
@@ -16,7 +14,7 @@ export const createCarRecord = async (
     next: NextFunction
 ) => {
     try {
-        const body = schemaValidation(CarRequestBodySchema, req.body)
+        const body = req.body
         const response = await carService.createCarRecord(body)
         if (response) res.status(200).send(formatResponse(response))
     } catch (error) {
@@ -30,7 +28,7 @@ export const createCarBrandRecord = async (
     next: NextFunction
 ) => {
     try {
-        const body = schemaValidation(CarBrandRequestBodySchema, req.body)
+        const body = req.body
         const response = await carService.createCarRecord(body)
         if (response) res.status(200).send(formatResponse(response))
     } catch (error) {
