@@ -2,6 +2,7 @@
 dist/
 /data
 .env
+.env.production
 .nx/
 gcp_key.json
 package-lock.json
