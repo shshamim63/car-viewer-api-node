@@ -1,6 +1,3 @@
-import dotenv from 'dotenv'
-dotenv.config()
-
 export const appConfig = {
     port: process.env.PORT,
     baseURL: process.env.BASE_URL,
@@ -28,7 +25,7 @@ const {
 export const mongoConfig = {
     mongoURL:
         appConfig.env === 'testing' || appConfig.env === 'production'
-            ?  process.env.MONGO_URI
+            ? process.env.MONGO_URI
             : `mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=admin`,
 }
 
