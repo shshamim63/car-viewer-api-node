@@ -1,21 +1,24 @@
 import { AppError } from '../utils/appError'
+import { Types } from 'mongoose'
 
-import * as carDB from '../repositories/carRepository'
+import * as carDB from '../repositories/car.repository'
+import { CarRequestBody, MongoCar } from '../interfaces/car.interface'
+import { User } from '../interfaces/user.interface'
 
-export const createCarRecord = async (body): Promise<string> => {
+export const createCar = async (
+    carInfo: CarRequestBody,
+    user: User
+): Promise<MongoCar> => {
     try {
-        await carDB.createCar(body)
-        return 'Created Car Record SuccessFully'
+        const userObjectId = new Types.ObjectId(user.id)
+        const data = {
+            ...carInfo,
+            created_by: userObjectId,
+            last_modified_by: userObjectId,
+        }
+        const car = await carDB.createCar(data)
+        return car
     } catch (error) {
         throw new AppError(500, 'Server error')
     }
 }
-
-// export const createCarBrandRecord = async (body): Promise<string> => {
-//     try {
-//         await carDB.createCarBrand(body)
-//         return 'Created Car Brand Record SuccessFully'
-//     } catch (error) {
-//         throw new AppError(500, 'Server error')
-//     }
-// }

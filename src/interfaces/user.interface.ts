@@ -6,6 +6,7 @@ import {
     loginSchema,
     signupSchema,
 } from '../validators/auth.validator'
+import { MongoTimeStamp } from './mongo.interface'
 
 export type LoginRequestBody = z.infer<typeof loginSchema>
 export type SignupRequestBody = z.infer<typeof signupSchema>
@@ -36,11 +37,6 @@ export interface UserUpdateAbleFields {
     avatar?: string
     role: UserRole.Admin | UserRole.User | UserRole.Super
     status: UserStatus.Active | UserStatus.Inactive
-}
-
-interface MongoTimeStamp {
-    createdAt: Date
-    updatedAt: Date
 }
 
 interface UserData extends UserUpdateAbleFields, MongoTimeStamp {

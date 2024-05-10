@@ -10,7 +10,8 @@ export const createCar = async (
 ) => {
     try {
         const body = req.body
-        const response = await carService.createCarRecord(body)
+        const user = req.user
+        const response = await carService.createCar(body, user)
         if (response) res.status(200).send(formatResponse(response))
     } catch (error) {
         next(error)
