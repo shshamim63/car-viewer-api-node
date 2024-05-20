@@ -3,7 +3,7 @@ import client from 'prom-client'
 
 export const root = (req: Request, res: Response) => {
     res.send({
-        message: 'App server is running successfully',
+        message: 'Server running successfully',
     })
 }
 

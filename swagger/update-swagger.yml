@@ -1,0 +1,96 @@
+openapi: 3.0.3
+info:
+    title: Sample API
+    description: Optional multiline or single-line description in HTML.
+    version: 0.1.9
+servers:
+    - url: http://localhost:8080
+      description: Local Server
+security:
+    - BearerAuth: []
+paths:
+    /:
+        get:
+            tags:
+                - Default
+            summary: The root path of the service
+            description: This route provides the indication that the server is running appropriately
+            responses:
+                '200':
+                    description: A JSON object
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ServiceRunning'
+    /auth/registration:
+        post:
+            tags:
+                - Auth
+            summary: Returns registration success message with instruction
+            description: Allows to register a user while having whitelisted properties
+            requestBody: 
+                $ref: '#/components/requestBodies/UserRegistrationBody'
+            responses: 
+                '201':
+                    description: Returns a JSON object containing success response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RegistrationSuccess'
+components:
+    securitySchemes:
+        BearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+    requestBodies: 
+        UserRegistrationBody:
+            description: A JSON object containing properties related to the UserRegistrationBody
+            required: true
+            content:
+                application/json: 
+                    schema:
+                        $ref: '#/components/schemas/UserRegistrationBody'
+    schemas:
+        UserRegistrationBody:
+            type: object
+            required: 
+                - email
+                - password
+                - confirmPassword
+                - username
+            properties:
+                avatar:
+                    type: string
+                    description: Avatar url
+                    example: https://user:101/profile/picture
+                email:
+                    type: string
+                    description: Active user email
+                    example: demo@gmail.com
+                password:
+                    type: string
+                    description: User password
+                    example: demo12128
+                confirmPassword:
+                    type: string
+                    description: Same as password
+                    example: demo12128
+                username:
+                    type: string
+                    description: Unique username
+                    example: demouser
+        ServiceRunning:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: Server running information
+                    example: Server running successfully
+        RegistrationSuccess:
+            type: object
+            properties:
+                data:
+                    type: string
+                    description: Success response message with next step instruction
+                    example: Registration successful, please check email to verify your account

@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
     title: Sample API
     description: Optional multiline or single-line description in HTML.
@@ -82,17 +82,17 @@ paths:
                                 $ref: '#/components/schemas/InvalidResponse'
     /auth/logout:
         post:
-            tags: 
+            tags:
                 - Auth
             summary: Logout Route
             description: Allows user to logout
             parameters:
-              - in: header
-                name: token
-                schema:
-                    type: string
-                    format: uuid
-                required: true
+                - in: header
+                  name: token
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
             responses:
                 '401':
                     description: Unauthorized
@@ -112,7 +112,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/LogoutSuccess'
-                    
+
     /auth/user/activate:
         post:
             tags:
