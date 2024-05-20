@@ -1,5 +1,3 @@
-security:
-    - bearerAuth: []
 openapi: 3.0.3
 info:
     title: Sample API
@@ -29,7 +27,7 @@ paths:
             summary: Registration path for users
             description: This route allows to create user in to system
             requestBody:
-                $ref: '#/components/requestBodies/RegistrationBody'
+                $ref: '#/components/requestBodies/UserRegistrationBody'
             responses:
                 '201':
                     description: Retrun a JSON object when record created
@@ -56,7 +54,7 @@ paths:
             summary: Login Route
             description: Allows user to authenticate and access service with access token
             requestBody:
-                $ref: '#/components/requestBodies/LoginBody'
+                $ref: '#/components/requestBodies/LoginCredentials'
             responses:
                 '200':
                     description: Returns a JSON object when creadentials are valid
@@ -179,18 +177,20 @@ paths:
                                 $ref: '#/components/schemas/AuthorizedUser'
 components:
     requestBodies:
-        RegistrationBody:
+        UserRegistrationBody:
+            description: A JSON object containing information about the user
             required: true
             content:
                 application/json:
                     schema:
-                        $ref: '#/components/schemas/RegistrationRequestBody'
-        LoginBody:
+                        $ref: '#/components/schemas/UserRegistrationBody'
+        LoginCredentials:
+            description: A JSON object containing login credentials
             required: true
             content:
                 application/json:
                     schema:
-                        $ref: '#/components/schemas/LoginRequestBody'
+                        $ref: '#/components/schemas/LoginCredentials'
     schemas:
         ActiveMessage:
             type: object
@@ -321,7 +321,7 @@ components:
                     items:
                         type: string
                         example: email
-        LoginRequestBody:
+        LoginCredentials:
             type: object
             required:
                 - email
@@ -361,9 +361,9 @@ components:
                 message:
                     type: string
                     example: User was registered successfully! Please check your email
-        RegistrationRequestBody:
+        UserRegistrationBody:
             allOf:
-                - $ref: '#/components/schemas/LoginRequestBody'
+                - $ref: '#/components/schemas/LoginCredentials'
                 - type: object
                   required:
                       - confirmPassword

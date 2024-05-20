@@ -10,7 +10,9 @@ export const isAuthenticated = (
 ) => {
     const { authorization } = req.headers
     const token = authorization && authorization.split(' ')[1]
+
     if (token == null) throw new AppError(401, 'Unauthorized user')
+
     const user = verifyToken(token, authConfig.accessTokenSecret)
     req.user = user
     next()
