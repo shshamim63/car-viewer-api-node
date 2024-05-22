@@ -37,6 +37,12 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/RegistrationSuccess'
+                '400':
+                    description: Returns a JSON object containing schema validation message
+                    content: 
+                        application/json: 
+                            schema:
+                                $ref: '#/components/schemas/RegistrationValidationResponse'
 components:
     securitySchemes:
         BearerAuth:
@@ -94,3 +100,71 @@ components:
                     type: string
                     description: Success response message with next step instruction
                     example: Registration successful, please check email to verify your account
+        RegistrationValidationResponse:
+            type: object
+            allOf:
+                - $ref: '#/components/schemas/ValidationGeneralMessage'
+                - $ref: '#/components/schemas/RegistrationValidationDescription'
+
+        RegistrationValidationDescription:
+            type: object
+            required:
+                - description
+            properties:
+                description:
+                    type: array
+                    items:
+                        allOf:
+                            - $ref: '#/components/schemas/EmailValidation'
+                            - $ref: '#/components/schemas/PasswordValidation'
+        ValidationGeneralMessage:
+            type: object
+            required:
+                - message
+            properties:
+                message:
+                    type: string
+                    description: General message about schema validation
+                    example: Invalid Schema
+        EmailValidation:
+            allOf:
+                - $ref: '#/components/schemas/ValidationCommonMessage'
+                - type: object
+                  required:
+                      - path
+                  properties:
+                        path:
+                            type: array
+                            items:
+                                type: string
+                                example: email
+                        message:
+                            type: string
+                            example: Email must exist
+        PasswordValidation:
+            allOf:
+                - $ref: '#/components/schemas/ValidationCommonMessage'
+                - type: object
+            required:
+                - path
+            properties:
+                path:
+                    type: array
+                    items:
+                        type: string
+                        example: password
+                message:
+                    type: string
+                    example: Required
+        ValidationCommonMessage:
+            type: object
+            properties:
+                code:
+                    type: string
+                    example: invalid_type
+                expected:
+                    type: string
+                    example: string
+                received:
+                    type: string
+                    example: undefined
