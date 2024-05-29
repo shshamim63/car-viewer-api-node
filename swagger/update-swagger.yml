@@ -105,7 +105,6 @@ components:
             allOf:
                 - $ref: '#/components/schemas/ValidationGeneralMessage'
                 - $ref: '#/components/schemas/RegistrationValidationDescription'
-
         RegistrationValidationDescription:
             type: object
             required:
@@ -114,9 +113,28 @@ components:
                 description:
                     type: array
                     items:
-                        allOf:
-                            - $ref: '#/components/schemas/EmailValidation'
-                            - $ref: '#/components/schemas/PasswordValidation'
+                        $ref: '#/components/schemas/ValidationCommonMessage'
+                    example:
+                        -   code: invalid_type
+                            expected: string
+                            received: undefined
+                            path: [ email ]
+                            message: Email must exist
+                        -   code: invalid_type
+                            expected: string
+                            received: undefined
+                            path: [password]
+                            message: Required
+                        -   code: invalid_type
+                            expected: string
+                            received: undefined
+                            path: [username]
+                            message: Required
+                        -   code: invalid_type
+                            expected: string
+                            received: undefined
+                            path: [confirmPassword]
+                            message: Required
         ValidationGeneralMessage:
             type: object
             required:
@@ -126,36 +144,6 @@ components:
                     type: string
                     description: General message about schema validation
                     example: Invalid Schema
-        EmailValidation:
-            allOf:
-                - $ref: '#/components/schemas/ValidationCommonMessage'
-                - type: object
-                  required:
-                      - path
-                  properties:
-                        path:
-                            type: array
-                            items:
-                                type: string
-                                example: email
-                        message:
-                            type: string
-                            example: Email must exist
-        PasswordValidation:
-            allOf:
-                - $ref: '#/components/schemas/ValidationCommonMessage'
-                - type: object
-            required:
-                - path
-            properties:
-                path:
-                    type: array
-                    items:
-                        type: string
-                        example: password
-                message:
-                    type: string
-                    example: Required
         ValidationCommonMessage:
             type: object
             properties:
@@ -168,3 +156,11 @@ components:
                 received:
                     type: string
                     example: undefined
+                path:
+                    type: array
+                    items:
+                        type: string
+                        example: password
+                message:
+                    type: string
+                    example: Required
