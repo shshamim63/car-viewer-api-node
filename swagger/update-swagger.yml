@@ -43,6 +43,18 @@ paths:
                         application/json: 
                             schema:
                                 $ref: '#/components/schemas/RegistrationValidationResponse'
+                '409':
+                    description: Returns a JSON object containing message about user already exist
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserExistResponse'
+                '500':
+                    description: Returns a JSON object containing message about internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
 components:
     securitySchemes:
         BearerAuth:
@@ -58,6 +70,12 @@ components:
                     schema:
                         $ref: '#/components/schemas/UserRegistrationBody'
     schemas:
+        InternalServerError:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: Server Error
         UserRegistrationBody:
             type: object
             required: 
@@ -73,7 +91,7 @@ components:
                 email:
                     type: string
                     description: Active user email
-                    example: demo@gmail.com
+                    format: email
                 password:
                     type: string
                     description: User password
@@ -102,18 +120,15 @@ components:
                     example: Registration successful, please check email to verify your account
         RegistrationValidationResponse:
             type: object
-            allOf:
-                - $ref: '#/components/schemas/ValidationGeneralMessage'
-                - $ref: '#/components/schemas/RegistrationValidationDescription'
-        RegistrationValidationDescription:
-            type: object
-            required:
-                - description
             properties:
+                message:
+                    type: string
+                    description: General message about schema validation
+                    example: Invalid Schema
                 description:
                     type: array
                     items:
-                        $ref: '#/components/schemas/ValidationCommonMessage'
+                        $ref: '#/components/schemas/CommonValidationMessage'
                     example:
                         -   code: invalid_type
                             expected: string
@@ -144,7 +159,7 @@ components:
                     type: string
                     description: General message about schema validation
                     example: Invalid Schema
-        ValidationCommonMessage:
+        CommonValidationMessage:
             type: object
             properties:
                 code:
@@ -164,3 +179,25 @@ components:
                 message:
                     type: string
                     example: Required
+        UserExistResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: Dulicate user message
+                    example: User already exists
+                description:
+                    oneOf:
+                        - $ref: '#/components/schemas/EmailDescription'
+                        - $ref: '#/components/schemas/UsernameDescription'
+        EmailDescription:
+            type: object
+            properties:
+                email:
+                    type: string
+                    format: email
+        UsernameDescription:
+            type: object
+            properties:
+                username:
+                    type: string
