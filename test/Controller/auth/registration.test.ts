@@ -3,11 +3,13 @@ import { faker } from '@faker-js/faker'
 
 import { app } from '../../../src/app'
 
+import { AppError } from '../../../src/utils/appError'
+import { RESPONSE_MESSAGE, STATUS_CODES } from '../../../src/const/error'
+
 import * as MailHelper from '../../../src/utils/mailer'
 import * as userDB from '../../../src/repositories/user.repository'
 
 import { SignupRequestBody } from '../../../src/interfaces/user.interface'
-import { AppError } from '../../../src/utils/appError'
 import {
     mongodbUser,
     generateSignupRequestBody,
@@ -36,7 +38,7 @@ describe('Auth/Registration', () => {
                 .send(signupPayload)
             const { status, body } = response
             const { message, description } = body
-            expect(status).toEqual(400)
+            expect(status).toEqual(STATUS_CODES.BAD_REQUEST)
             expect(body).toMatchObject({
                 message: expect.any(String),
                 description: expect.any(Array),
@@ -56,7 +58,7 @@ describe('Auth/Registration', () => {
                     status,
                     body: { message, description },
                 } = response
-                expect(status).toEqual(400)
+                expect(status).toEqual(STATUS_CODES.BAD_REQUEST)
                 expect(message).toEqual(invalidSchemaMessage)
                 expect(description[0].validation).toEqual('email')
             })
@@ -66,7 +68,7 @@ describe('Auth/Registration', () => {
                 const response = await request(app)
                     .post('/auth/registration')
                     .send(signupPayload)
-                expect(response.status).toEqual(201)
+                expect(response.status).toEqual(STATUS_CODES.CREATED)
                 expect(createUserSpy).toHaveBeenCalled()
                 expect(mailSpy).toHaveBeenCalled()
             })
@@ -83,7 +85,7 @@ describe('Auth/Registration', () => {
                     status,
                     body: { message, description },
                 } = response
-                expect(status).toEqual(400)
+                expect(status).toEqual(STATUS_CODES.BAD_REQUEST)
                 expect(message).toEqual(invalidSchemaMessage)
                 expect(description[0].path.includes('username')).toBeTruthy()
             })
@@ -98,7 +100,7 @@ describe('Auth/Registration', () => {
                     status,
                     body: { message, description },
                 } = response
-                expect(status).toEqual(400)
+                expect(status).toEqual(STATUS_CODES.BAD_REQUEST)
                 expect(message).toEqual(invalidSchemaMessage)
                 expect(description[0].code).toEqual('too_small')
                 expect(description[0].minimum).toEqual(8)
@@ -113,7 +115,7 @@ describe('Auth/Registration', () => {
                     .send(signupPayload)
 
                 const { status } = response
-                expect(status).toEqual(201)
+                expect(status).toEqual(STATUS_CODES.CREATED)
                 expect(createUserSpy).toHaveBeenCalled()
                 expect(mailSpy).toHaveBeenCalled()
             })
@@ -141,7 +143,7 @@ describe('Auth/Registration', () => {
                     .send(signupPayload)
 
                 const { status } = response
-                expect(status).toEqual(201)
+                expect(status).toEqual(STATUS_CODES.CREATED)
                 expect(createUserSpy).toHaveBeenCalled()
                 expect(mailSpy).toHaveBeenCalled()
             })
@@ -157,7 +159,7 @@ describe('Auth/Registration', () => {
                     status,
                     body: { message, description },
                 } = response
-                expect(status).toEqual(400)
+                expect(status).toEqual(STATUS_CODES.BAD_REQUEST)
                 expect(message).toEqual(invalidSchemaMessage)
                 expect(description[0].code).toEqual('too_small')
                 expect(description[0].minimum).toEqual(8)
@@ -171,7 +173,7 @@ describe('Auth/Registration', () => {
                     .post('/auth/registration')
                     .send(signupPayload)
                 const { status } = response
-                expect(status).toEqual(201)
+                expect(status).toEqual(STATUS_CODES.CREATED)
                 expect(createUserSpy).toHaveBeenCalled()
                 expect(mailSpy).toHaveBeenCalled()
             })
@@ -187,7 +189,7 @@ describe('Auth/Registration', () => {
                     status,
                     body: { message, description },
                 } = response
-                expect(status).toEqual(400)
+                expect(status).toEqual(STATUS_CODES.BAD_REQUEST)
                 expect(message).toEqual(invalidSchemaMessage)
                 expect(description[0].message).toEqual(
                     'String must contain at least 8 character(s)'
@@ -199,7 +201,7 @@ describe('Auth/Registration', () => {
                     .post('/auth/registration')
                     .send(signupPayload)
                 const { status } = response
-                expect(status).toEqual(201)
+                expect(status).toEqual(STATUS_CODES.CREATED)
                 expect(createUserSpy).toHaveBeenCalled()
                 expect(mailSpy).toHaveBeenCalled()
             })
@@ -211,7 +213,7 @@ describe('Auth/Registration', () => {
                     .post('/auth/registration')
                     .send(signupPayload)
                 const { status } = response
-                expect(status).toEqual(201)
+                expect(status).toEqual(STATUS_CODES.CREATED)
                 expect(createUserSpy).toHaveBeenCalled()
                 expect(mailSpy).toHaveBeenCalled()
             })
@@ -222,8 +224,8 @@ describe('Auth/Registration', () => {
 
                 createUserSpy.mockImplementationOnce(() => {
                     throw new AppError(
-                        409,
-                        `User already exists`,
+                        STATUS_CODES.CONFLICT,
+                        RESPONSE_MESSAGE.CONFLICT,
                         JSON.stringify(errorKeyValue)
                     )
                 })
@@ -235,8 +237,8 @@ describe('Auth/Registration', () => {
                     status,
                     body: { message, description },
                 } = response
-                expect(status).toEqual(409)
-                expect(message).toEqual('User already exists')
+                expect(status).toEqual(STATUS_CODES.CONFLICT)
+                expect(message).toEqual(RESPONSE_MESSAGE.CONFLICT)
                 expect(JSON.parse(description)).toMatchObject({
                     email: expect.any(String),
                 })

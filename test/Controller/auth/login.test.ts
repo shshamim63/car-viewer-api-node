@@ -12,6 +12,8 @@ import {
     mongodbUser,
 } from '../../data/user.data'
 
+import { STATUS_CODES } from '../../../src/const/error'
+
 describe('Auth/Login', () => {
     let findUserSpy
     let bcryptSpy
@@ -39,7 +41,7 @@ describe('Auth/Login', () => {
                     status,
                     body: { message, description },
                 } = response
-                expect(status).toEqual(400)
+                expect(status).toEqual(STATUS_CODES.BAD_REQUEST)
                 expect(message).toEqual(invalidSchemaMessage)
                 expect(description.length).toEqual(2)
             })
@@ -54,7 +56,7 @@ describe('Auth/Login', () => {
                     status,
                     body: { message, description },
                 } = response
-                expect(status).toEqual(400)
+                expect(status).toEqual(STATUS_CODES.BAD_REQUEST)
                 expect(message).toEqual(invalidSchemaMessage)
                 expect(description[0]).toMatchObject({
                     validation: expect.any(String),
@@ -72,7 +74,7 @@ describe('Auth/Login', () => {
                     })
                 const { status, body } = response
                 const { description } = body
-                expect(status).toEqual(400)
+                expect(status).toEqual(STATUS_CODES.BAD_REQUEST)
                 expect(body).toMatchObject({
                     message: expect.any(String),
                     description: expect.any(Array),
@@ -100,7 +102,7 @@ describe('Auth/Login', () => {
                     description: expect.any(String),
                 })
                 expect(body.description.includes(loginCredentials.email))
-                expect(status).toEqual(404)
+                expect(status).toEqual(STATUS_CODES.NOT_FOUND)
             })
             test('Response should have code 401 when password is incorrect', async () => {
                 findUserSpy.mockResolvedValue(mongodbUser())
@@ -109,7 +111,7 @@ describe('Auth/Login', () => {
                     .post('/auth/login')
                     .send(loginCredentials)
                 const { status, body } = response
-                expect(status).toEqual(401)
+                expect(status).toEqual(STATUS_CODES.UNAUTHORIZED)
                 expect(body).toMatchObject({
                     message: expect.any(String),
                     description: expect.any(String),
@@ -138,7 +140,7 @@ describe('Auth/Login', () => {
                     type: expect.any(String),
                 })
                 expect(saveRefreshTokenSpy).toHaveBeenCalled()
-                expect(status).toEqual(200)
+                expect(status).toEqual(STATUS_CODES.OK)
             })
         })
     })

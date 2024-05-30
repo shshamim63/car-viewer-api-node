@@ -8,6 +8,11 @@ import { SALTROUNDS } from '../const'
 import { generateToken, verifyToken } from '../utils/jwt'
 
 import { AppError } from '../utils/appError'
+import {
+    ERROR_DESCCRIPTION,
+    STATUS_CODES,
+    RESPONSE_MESSAGE,
+} from '../const/error'
 
 import * as MailHelper from '../utils/mailer'
 
@@ -19,6 +24,7 @@ import {
     UserStatus,
 } from '../interfaces/user.interface'
 import { userSerializer } from '../serialization/auth.serializer'
+import { logger } from '../utils/logger'
 
 export const activateAccount = async (
     query: ActivateAccountQuery,
@@ -35,8 +41,9 @@ export const activateAccount = async (
             })
             if (currentUser.status === UserStatus.Active)
                 throw new AppError(
-                    403,
-                    'The user already has an active account'
+                    STATUS_CODES.FORBIDDEN,
+                    RESPONSE_MESSAGE.FORBIDDEN,
+                    ERROR_DESCCRIPTION.USER_ACTIVE
                 )
             await userDB.findAndUpdateUser(
                 { _id: decodedUser.id, status: UserStatus.Inactive },
@@ -44,7 +51,11 @@ export const activateAccount = async (
             )
             return 'Account activated successfully'
         } else {
-            throw new AppError(403, 'The user already has an active account')
+            throw new AppError(
+                STATUS_CODES.FORBIDDEN,
+                RESPONSE_MESSAGE.FORBIDDEN,
+                ERROR_DESCCRIPTION.USER_ACTIVE
+            )
         }
     } catch (error) {
         next(error)
@@ -64,9 +75,9 @@ export const login = async (
 
         if (!currentUser)
             throw new AppError(
-                404,
-                'Invalid user credential',
-                `User does not exist with email: ${body.email}`
+                STATUS_CODES.NOT_FOUND,
+                RESPONSE_MESSAGE.NOT_FOUND,
+                `${RESPONSE_MESSAGE.NOT_FOUND} with email: ${body.email}`
             )
 
         const authenticate = await bcrypt.compare(
@@ -75,9 +86,9 @@ export const login = async (
         )
         if (!authenticate)
             throw new AppError(
-                401,
-                'Invalid user credential',
-                `Invalid password`
+                STATUS_CODES.UNAUTHORIZED,
+                RESPONSE_MESSAGE.UNAUTHORIZED,
+                ERROR_DESCCRIPTION.INVALID_PASSWORD
             )
 
         const serializedUser = userSerializer(currentUser)
@@ -112,14 +123,26 @@ export const logout = async (
     try {
         const isTokenValid = verifyToken(token, authConfig.refreshTokenSecret)
 
-        if (!isTokenValid) throw new AppError(401, 'Invalid credentials')
+        if (!isTokenValid)
+            throw new AppError(
+                STATUS_CODES.UNAUTHORIZED,
+                RESPONSE_MESSAGE.UNAUTHORIZED,
+                ERROR_DESCCRIPTION.INVALID_TOKEN
+            )
 
         const deleteStatus = await userDB.removeToken({
             userId: isTokenValid.id,
             token: token,
         })
 
-        if (!deleteStatus) throw new AppError(404, 'Token is not whitelisted')
+        if (!deleteStatus) {
+            logger.info(ERROR_DESCCRIPTION.INVALID_TOKEN_ACCESS)
+            throw new AppError(
+                STATUS_CODES.NOT_FOUND,
+                RESPONSE_MESSAGE.NOT_FOUND,
+                ERROR_DESCCRIPTION.INVALID_TOKEN
+            )
+        }
 
         return 'Logout successfull'
     } catch (error) {
@@ -177,7 +200,11 @@ export const refreshToken = async (
         const user = verifyToken(refresh_token, authConfig.refreshTokenSecret)
         const currentUser = await userDB.findOneUser({ _id: user.id })
 
-        if (!currentUser) throw new AppError(404, 'Sorry, user does not exist')
+        if (!currentUser)
+            throw new AppError(
+                STATUS_CODES.FORBIDDEN,
+                RESPONSE_MESSAGE.FORBIDDEN
+            )
 
         const serializedUser = userSerializer(currentUser)
         const accessToken = generateToken(

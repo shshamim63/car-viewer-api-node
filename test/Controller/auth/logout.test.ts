@@ -4,7 +4,10 @@ import { faker } from '@faker-js/faker'
 
 import { app } from '../../../src/app'
 import * as userDB from '../../../src/repositories/user.repository'
+
 import { tokenPayload } from '../../data/user.data'
+
+import { STATUS_CODES } from '../../../src/const/error'
 
 describe('Logout testing', () => {
     beforeEach(() => {
@@ -22,7 +25,7 @@ describe('Logout testing', () => {
                 status,
                 body: { message, description },
             } = response
-            expect(status).toEqual(400)
+            expect(status).toEqual(STATUS_CODES.BAD_REQUEST)
             expect(typeof message).toBe('string')
             expect(description[0]).toMatchObject({
                 code: expect.any(String),
@@ -41,12 +44,12 @@ describe('Logout testing', () => {
                 status,
                 body: { message },
             } = response
-            expect(status).toEqual(401)
+            expect(status).toEqual(STATUS_CODES.UNAUTHORIZED)
             expect(typeof message).toBe('string')
         })
     })
     describe('Logout flow', () => {
-        test('Response should contain status 401 when token is valid but is absent in the database', async () => {
+        test('Response should contain status 404 when token is valid but is absent in the database', async () => {
             (jwt.verify as jest.Mock).mockReturnValue(tokenPayload)
             const refreshToken = faker.string.hexadecimal({ length: 64 })
             const deleteToken = jest
@@ -59,7 +62,7 @@ describe('Logout testing', () => {
                 status,
                 body: { message },
             } = response
-            expect(status).toEqual(404)
+            expect(status).toEqual(STATUS_CODES.NOT_FOUND)
             expect(typeof message).toBe('string')
             expect(deleteToken).toHaveBeenCalled()
         })
@@ -76,7 +79,7 @@ describe('Logout testing', () => {
                 status,
                 body: { data },
             } = response
-            expect(status).toEqual(200)
+            expect(status).toEqual(STATUS_CODES.OK)
             expect(typeof data).toBe('string')
             expect(deleteToken).toHaveBeenCalled()
         })

@@ -1,5 +1,7 @@
-import { AppError } from '../utils/appError'
 import { Types } from 'mongoose'
+
+import { AppError } from '../utils/appError'
+import { RESPONSE_MESSAGE, STATUS_CODES } from '../const/error'
 
 import * as carDB from '../repositories/car.repository'
 import { CarRequestBody, MongoCar } from '../interfaces/car.interface'
@@ -19,6 +21,9 @@ export const createCar = async (
         const car = await carDB.createCar(data)
         return car
     } catch (error) {
-        throw new AppError(500, 'Server error')
+        throw new AppError(
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            RESPONSE_MESSAGE.INTERNAL_SERVER_ERROR
+        )
     }
 }
