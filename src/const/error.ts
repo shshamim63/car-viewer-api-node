@@ -26,3 +26,5 @@ export const ERROR_DESCCRIPTION = {
     INVALID_TOKEN: 'Invalid token',
     INVALID_TOKEN_ACCESS: 'Accessed the system with invalid token',
 }
+
+export const CORS_ERROR_MESSAGE ='The CORS policy for this site does not allow access from the specified origin.'

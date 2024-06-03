@@ -13,6 +13,7 @@ import {
     STATUS_CODES,
     RESPONSE_MESSAGE,
 } from '../const/error'
+import { RESPONSE_DESCRIPTION } from '../const/description'
 
 import * as MailHelper from '../utils/mailer'
 
@@ -49,7 +50,7 @@ export const activateAccount = async (
                 { _id: decodedUser.id, status: UserStatus.Inactive },
                 { status: UserStatus.Active }
             )
-            return 'Account activated successfully'
+            return RESPONSE_DESCRIPTION.ACTIVATION_SUCCESS
         } else {
             throw new AppError(
                 STATUS_CODES.FORBIDDEN,
@@ -144,7 +145,7 @@ export const logout = async (
             )
         }
 
-        return 'Logout successfull'
+        return RESPONSE_DESCRIPTION.LOGOUT_SUCCESS
     } catch (error) {
         next(error)
     }
@@ -182,7 +183,7 @@ export const registerUser = async (
             template: 'verification-mail',
         })
 
-        return 'Registration successful, please check email to verify your account'
+        return RESPONSE_DESCRIPTION.REGISTRATION_SUCCESSFULL
     } catch (error) {
         next(error)
     }
