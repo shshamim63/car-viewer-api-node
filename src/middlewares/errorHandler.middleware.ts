@@ -3,6 +3,8 @@ import { NextFunction, Request, Response } from 'express'
 import { ErrorProperty } from '../model/utils/error'
 import { logger } from '../utils/logger'
 
+import { RESPONSE_MESSAGE } from '../const/error'
+
 interface CustomError extends Error {
     statusCode: number
     description?: string | ErrorProperty
@@ -15,7 +17,9 @@ export const errorHandlerMiddleware = (
     next: NextFunction
 ) => {
     const errorResponse = {
-        message: err.message ? err.message : 'Server Error',
+        message: err.message
+            ? err.message
+            : RESPONSE_MESSAGE.INTERNAL_SERVER_ERROR,
         ...(err.description && { description: err.description }),
     }
     const statusCode = err.statusCode ? err.statusCode : 500

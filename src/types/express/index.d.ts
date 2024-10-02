@@ -1,4 +1,10 @@
-import { Request } from 'express'
-export interface CustomRequest extends Request {
-    user?: any
+import express from 'express'
+import { User } from '../../interfaces/user.interface'
+
+declare global {
+    namespace Express {
+        interface Request {
+            user?: User
+        }
+    }
 }

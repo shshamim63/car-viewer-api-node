@@ -6,6 +6,11 @@ import { app } from '../../../src/app'
 import * as userDB from '../../../src/repositories/user.repository'
 import { mongodbUser } from '../../data/user.data'
 import { UserStatus } from '../../../src/interfaces/user.interface'
+import {
+    ERROR_DESCCRIPTION,
+    RESPONSE_MESSAGE,
+    STATUS_CODES,
+} from '../../../src/const/error'
 
 describe('Tests for User Activation', () => {
     afterEach(() => {
@@ -21,7 +26,7 @@ describe('Tests for User Activation', () => {
                 status,
                 body: { message, description },
             } = response
-            expect(status).toEqual(status)
+            expect(status).toEqual(STATUS_CODES.BAD_REQUEST)
             expect(typeof message).toBe('string')
             expect(description[0]).toMatchObject({
                 code: expect.any(String),
@@ -41,7 +46,7 @@ describe('Tests for User Activation', () => {
                 status,
                 body: { message },
             } = response
-            expect(status).toEqual(401)
+            expect(status).toEqual(STATUS_CODES.UNAUTHORIZED)
             expect(typeof message).toBe('string')
         })
         test('Response should have 403 status code when decoded user has activated status', async () => {
@@ -55,11 +60,11 @@ describe('Tests for User Activation', () => {
             )
             const {
                 status,
-                body: { message },
+                body: { message, description },
             } = response
-            expect(status).toEqual(403)
-            expect(message).toEqual(alreadyActiveMessageContext)
-            expect(typeof message).toBe('string')
+            expect(status).toEqual(STATUS_CODES.FORBIDDEN)
+            expect(message).toEqual(RESPONSE_MESSAGE.FORBIDDEN)
+            expect(description).toEqual(ERROR_DESCCRIPTION.USER_ACTIVE)
         })
         test('Response should have 403 status code when current user has activated status', async () => {
             const mongoUser = await mongodbUser()
@@ -77,7 +82,7 @@ describe('Tests for User Activation', () => {
                 body: { message },
             } = response
             expect(findUserSpy).toHaveBeenCalled()
-            expect(status).toBe(403)
+            expect(status).toBe(STATUS_CODES.FORBIDDEN)
             expect(typeof message).toBe('string')
         })
         test('Response should have status 200 when token is valid and user is inavtive', async () => {
@@ -103,7 +108,7 @@ describe('Tests for User Activation', () => {
             } = response
             expect(findUserSpy).toHaveBeenCalled()
             expect(findAndUpdateUserSpy).toHaveBeenCalled()
-            expect(status).toBe(200)
+            expect(status).toBe(STATUS_CODES.OK)
             expect(typeof data).toBe('string')
         })
     })

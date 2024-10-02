@@ -1,5 +1,7 @@
 import { Types } from 'mongoose'
+
 import { AppError } from '../utils/appError'
+import { RESPONSE_MESSAGE, STATUS_CODES } from '../const/error'
 
 import { RefreshToken, User } from '../model/user.model'
 import {
@@ -18,9 +20,16 @@ export const createUser = async (data: NewUser): Promise<MongoUser> => {
     } catch (error) {
         const { code, keyValue } = error
         if (code === 11000) {
-            throw new AppError(409, `User already exists`, keyValue)
+            throw new AppError(
+                STATUS_CODES.CONFLICT,
+                RESPONSE_MESSAGE.CONFLICT,
+                keyValue
+            )
         } else {
-            throw new AppError(500, 'Server error')
+            throw new AppError(
+                STATUS_CODES.INTERNAL_SERVER_ERROR,
+                RESPONSE_MESSAGE.INTERNAL_SERVER_ERROR
+            )
         }
     }
 }
@@ -37,7 +46,10 @@ export const findOneUser = async (
 
         return { ...currentUser, role, status }
     } catch (error) {
-        throw new AppError(500, 'Server error')
+        throw new AppError(
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            RESPONSE_MESSAGE.INTERNAL_SERVER_ERROR
+        )
     }
 }
 
@@ -49,11 +61,18 @@ export const findAndUpdateUser = async (
         const response = await User.findOneAndUpdate(filter, payload, {
             new: true,
         })
-        if (!response) throw new AppError(404, "User doesn't exist")
+        if (!response)
+            throw new AppError(
+                STATUS_CODES.NOT_FOUND,
+                RESPONSE_MESSAGE.NOT_FOUND
+            )
         return response.toObject()
     } catch (error) {
         if (error instanceof AppError) throw error
-        throw new AppError(500, 'Server error')
+        throw new AppError(
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            RESPONSE_MESSAGE.INTERNAL_SERVER_ERROR
+        )
     }
 }
 
@@ -63,7 +82,10 @@ export const findRefreshToken = async (token: string) => {
         if (!currentToken) return null
         return currentToken.toObject()
     } catch (error) {
-        throw new AppError(500, 'Server error')
+        throw new AppError(
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            RESPONSE_MESSAGE.INTERNAL_SERVER_ERROR
+        )
     }
 }
 
@@ -75,7 +97,10 @@ export const saveRefreshToken = async (
         const token = new RefreshToken({ userId: userId, token: refreshToken })
         await token.save()
     } catch (error) {
-        throw new AppError(500, 'Server Error')
+        throw new AppError(
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            RESPONSE_MESSAGE.INTERNAL_SERVER_ERROR
+        )
     }
 }
 
@@ -84,6 +109,9 @@ export const removeToken = async (query: MongoQuery): Promise<number> => {
         const { deletedCount } = await RefreshToken.deleteOne(query)
         return deletedCount
     } catch (error) {
-        throw new AppError(500, 'Server Error')
+        throw new AppError(
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            RESPONSE_MESSAGE.INTERNAL_SERVER_ERROR
+        )
     }
 }

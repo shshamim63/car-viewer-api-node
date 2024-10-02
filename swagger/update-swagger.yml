@@ -1,0 +1,287 @@
+openapi: 3.0.3
+info:
+    title: Sample API
+    description: Optional multiline or single-line description in HTML.
+    version: 0.1.9
+servers:
+    - url: http://localhost:8080
+      description: Local Server
+security:
+    - BearerAuth: []
+paths:
+    /:
+        get:
+            tags:
+                - Default
+            summary: The root path of the service
+            description: This route provides the indication that the server is running appropriately
+            responses:
+                '200':
+                    description: A JSON object
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ServiceRunning'
+    /auth/registration:
+        post:
+            tags:
+                - Auth
+            summary: Returns registration success message with instruction
+            description: Allows to register a user while having whitelisted properties
+            requestBody: 
+                $ref: '#/components/requestBodies/UserRegistrationBody'
+            responses: 
+                '201':
+                    description: Returns a JSON object containing success response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RegistrationSuccess'
+                '400':
+                    description: Returns a JSON object containing schema validation message
+                    content: 
+                        application/json: 
+                            schema:
+                                $ref: '#/components/schemas/RegistrationValidationResponse'
+                '409':
+                    description: Returns a JSON object containing message about user already exist
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserExistResponse'
+                '500':
+                    description: Returns a JSON object containing message about internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+    /auth/user/activate:
+        post:
+            tags:
+                - auth
+            summary: Resturn user activation message
+            description: Allows registered users to activate their account
+            parameters: 
+              - in: query
+                name: token
+                required: true
+                schema: 
+                  type: string
+            responses:
+                200:
+                    description: Returns a JSON object containing message about activation successful.
+                    content: 
+                      application/json: 
+                        schema:
+                            $ref: '#/components/schemas/UserAccountActicationSuccess' 
+                          
+                400:
+                    description: Returns a JSON object containing schema validatin message
+                    content: 
+                      application/json: 
+                        schema:
+                            $ref: '#/components/schemas/TokenValidationResponse'
+                401:
+                    description: Returns a JSON object containing token validaton message
+                    content: 
+                      application/json: 
+                        schema:
+                            $ref: '#/components/schemas/UnauthorizedResponse'
+                403:
+                    description: Returns a JSON object containing user already activated message
+                    content: 
+                      application/json: 
+                        schema:
+                            $ref: '#/components/schemas/UserHasActiveAccountResponse'
+                500:
+                    description: Returns a JSON object containing message about internal server error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+components:
+    securitySchemes:
+        BearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+    requestBodies: 
+        UserRegistrationBody:
+            description: A JSON object containing properties related to the UserRegistrationBody
+            required: true
+            content:
+                application/json: 
+                    schema:
+                        $ref: '#/components/schemas/UserRegistrationBody'
+    schemas:
+        InternalServerError:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: Server Error
+        UserRegistrationBody:
+            type: object
+            required: 
+                - email
+                - password
+                - confirmPassword
+                - username
+            properties:
+                avatar:
+                    type: string
+                    description: Avatar url
+                    example: https://user:101/profile/picture
+                email:
+                    type: string
+                    description: Active user email
+                    format: email
+                password:
+                    type: string
+                    description: User password
+                    example: demo12128
+                confirmPassword:
+                    type: string
+                    description: Same as password
+                    example: demo12128
+                username:
+                    type: string
+                    description: Unique username
+                    example: demouser
+        ServiceRunning:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: Server running information
+                    example: Server running successfully
+        GeneralSuccessResponse:
+            type: object
+            properties:
+                data:
+                    type: string
+        RegistrationSuccess:
+            allOf:
+                - $ref: '#/components/schemas/GeneralSuccessResponse'
+            description: Success response message with next step instruction
+            example:
+                data: Registration successful, please check email to verify your account
+        RegistrationValidationResponse:
+            type: object
+            properties:
+                message:
+                    $ref: '#/components/schemas/InvalidSchemaMessage'
+                description:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CommonValidationMessage'
+                    example:
+                        -   code: invalid_type
+                            expected: string
+                            received: undefined
+                            path: [ email ]
+                            message: Email must exist
+                        -   code: invalid_type
+                            expected: string
+                            received: undefined
+                            path: [password]
+                            message: Required
+                        -   code: invalid_type
+                            expected: string
+                            received: undefined
+                            path: [username]
+                            message: Required
+                        -   code: invalid_type
+                            expected: string
+                            received: undefined
+                            path: [confirmPassword]
+                            message: Required
+        InvalidSchemaMessage:
+            type: string
+            description: General message about schema validation
+            example: Invalid Schema
+        CommonValidationMessage:
+            type: object
+            properties:
+                code:
+                    type: string
+                    example: invalid_type
+                expected:
+                    type: string
+                    example: string
+                received:
+                    type: string
+                    example: undefined
+                path:
+                    type: array
+                    items:
+                        type: string
+                        example: password
+                message:
+                    type: string
+                    example: Required
+        UserExistResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: Dulicate user message
+                    example: User already exists
+                description:
+                    oneOf:
+                        - $ref: '#/components/schemas/EmailDescription'
+                        - $ref: '#/components/schemas/UsernameDescription'
+        EmailDescription:
+            type: object
+            properties:
+                email:
+                    type: string
+                    format: email
+        UsernameDescription:
+            type: object
+            properties:
+                username:
+                    type: string
+        TokenValidationResponse:
+            type: object
+            properties: 
+                message:
+                    $ref: '#/components/schemas/InvalidSchemaMessage'
+                description:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CommonValidationMessage'
+                    example:
+                        -   code: invalid_type
+                            expected: string
+                            received: undefined
+                            path: [ token ]
+                            message: Required
+        GeneralErrorResponse:
+            type: object
+            required: 
+              - message
+              - description
+            properties: 
+                message:
+                    type: string
+                description:
+                    type: string
+        UnauthorizedResponse:
+            allOf:
+                - $ref: '#/components/schemas/GeneralErrorResponse'
+            example: 
+                message: Unauthorized access
+                description: invalid token
+        UserHasActiveAccountResponse:
+            allOf:
+                - $ref: '#/components/schemas/GeneralErrorResponse'
+            example: 
+                message: Forbidden
+                description: User has an active account
+        UserAccountActicationSuccess:
+            allOf:
+                - $ref: '#/components/schemas/GeneralSuccessResponse'
+            description: Success response message with Succes
+            example:
+                data: Account activated successfully

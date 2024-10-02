@@ -3,12 +3,16 @@ import request from 'supertest'
 import { faker } from '@faker-js/faker'
 
 import { app } from '../../../src/app'
+
 import * as userDB from '../../../src/repositories/user.repository'
+
 import {
     mongoRefreshToken,
     mongodbUser,
     tokenPayload,
 } from '../../data/user.data'
+
+import { RESPONSE_MESSAGE, STATUS_CODES } from '../../../src/const/error'
 
 describe('Tests for Rrefresh Token', () => {
     afterEach(() => {
@@ -24,7 +28,7 @@ describe('Tests for Rrefresh Token', () => {
                 status,
                 body: { message, description },
             } = response
-            expect(status).toEqual(400)
+            expect(status).toEqual(STATUS_CODES.BAD_REQUEST)
             expect(typeof message).toBe('string')
             expect(description[0]).toMatchObject({
                 code: expect.any(String),
@@ -49,14 +53,13 @@ describe('Tests for Rrefresh Token', () => {
                 status,
                 body: { message },
             } = response
-            expect(status).toEqual(403)
+            expect(status).toEqual(STATUS_CODES.FORBIDDEN)
             expect(typeof message).toBe('string')
         })
-        test('Response should contain status code 404 when user does not exist', async () => {
+        test('Response should contain status code 401 when user does not exist', async () => {
             findRefreshTokenSpy.mockResolvedValue(mongoRefreshToken(token))
             findOneUserSpy.mockImplementationOnce(() => Promise.resolve(null))
             ;(jwt.verify as jest.Mock).mockResolvedValue(tokenPayload)
-            // ;(jwt.sign as jest.Mock).mockResolvedValue(token)
             const response = await request(app)
                 .post('/auth/refresh/token')
                 .set('refresh_token', token)
@@ -64,10 +67,10 @@ describe('Tests for Rrefresh Token', () => {
                 status,
                 body: { message },
             } = response
-            expect(status).toEqual(404)
-            expect(typeof message).toBe('string')
+            expect(status).toEqual(STATUS_CODES.FORBIDDEN)
+            expect(message).toEqual(RESPONSE_MESSAGE.FORBIDDEN)
         })
-        test('Response should contain status code 404 when user does not exist', async () => {
+        test('Response should contain status code 200 when user does exist', async () => {
             findRefreshTokenSpy.mockResolvedValue(mongoRefreshToken(token))
             findOneUserSpy.mockImplementationOnce(() =>
                 Promise.resolve(mongodbUser())
@@ -81,7 +84,7 @@ describe('Tests for Rrefresh Token', () => {
                 status,
                 body: { data },
             } = response
-            expect(status).toEqual(200)
+            expect(status).toEqual(STATUS_CODES.OK)
             expect(data).toMatchObject({
                 avatar: expect.any(String),
                 createdAt: expect.any(String),
